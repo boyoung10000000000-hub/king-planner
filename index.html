@@ -31,7 +31,22 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:12px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.danger{color:#b91c1c}
-@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:8px}}
+
+.customer-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0;flex-wrap:wrap}
+.customer-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:auto;box-shadow:var(--shadow)}
+.customer-table{width:100%;border-collapse:collapse;min-width:1100px;font-size:13px}
+.customer-table th,.customer-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.customer-table th{background:#f8fafc;position:sticky;top:0}
+.status{display:inline-block;padding:5px 9px;border-radius:999px;font-weight:700;font-size:12px}
+.status-progress{background:#dbeafe;color:#1d4ed8}.status-contract{background:#fecdd3;color:#be123c}.status-other{background:#f1f5f9;color:#64748b}.status-done{background:#e2e8f0;color:#475569}
+.row-contract{background:#fff0f3}.row-other{background:#fafafa;color:#64748b}
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
+.modal.show{display:flex}.modal-box{background:#fff;border-radius:16px;width:min(760px,100%);max-height:92vh;overflow:auto;padding:20px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}
+.field input,.field select,.field textarea{border:1px solid #cbd5e1;border-radius:8px;padding:10px;font:inherit}.field textarea{min-height:74px;resize:vertical}
+.modal-actions{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:block;padding:8px}.brand{font-size:17px;margin:4px 6px 8px}.nav{display:flex;overflow:auto;gap:4px}.nav button{width:auto;white-space:nowrap;padding:8px}.main{padding:8px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+
 </style>
 </head>
 <body>
@@ -77,7 +92,29 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
     </section>
 
     <section id="schedule" class="section"><div class="topbar"><div class="title">일정관리</div></div></section>
-    <section id="customers" class="section"><div class="topbar"><div class="title">고객관리</div></div></section>
+    
+<section id="customers" class="section">
+  <div class="topbar">
+    <div>
+      <div class="title">고객관리</div>
+      <div class="sub">PC와 스마트폰에서 같은 고객자료를 실시간으로 사용합니다.</div>
+    </div>
+    <button class="btn primary" id="addCustomerBtn">+ 고객등록</button>
+  </div>
+  <div class="crm-grid" style="margin-top:14px">
+    <div class="crm-card"><b id="cntAll">0</b><br><span class="sub">전체 고객</span></div>
+    <div class="crm-card" style="background:#eff6ff"><b id="cntProgress">0</b><br><span class="sub">진행중 / 대기</span></div>
+    <div class="crm-card" style="background:#fff0f3"><b id="cntContract">0</b><br><span class="sub">계약완료</span></div>
+    <div class="crm-card" style="background:#fafafa"><b id="cntOther">0</b><br><span class="sub">타부동산 계약</span></div>
+  </div>
+  <div class="customer-table-wrap">
+    <table class="customer-table">
+      <thead><tr><th>등록일</th><th>고객</th><th>상태</th><th>거래</th><th>핵심조건</th><th>전화</th><th>계약/종료 정보</th><th>최근 통화</th><th>다음 알림</th><th>관리</th></tr></thead>
+      <tbody id="customerRows"><tr><td colspan="10">고객자료를 불러오는 중입니다.</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
     <section id="listings" class="section"><div class="topbar"><div class="title">접수매물</div></div></section>
     <section id="contracts" class="section"><div class="topbar"><div class="title">계약완료</div></div></section>
   </main>
@@ -86,7 +123,7 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_R1BqvCu6-6G50n8trya1OKb-u3oLAmU",
@@ -115,6 +152,106 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
       document.getElementById("loginOverlay").style.display = "flex";
     }
   });
+
+  let currentUser = null;
+  let customers = {};
+  let editingId = null;
+  let unsubscribeCustomers = null;
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+  function statusLabel(v){
+    return {progress:"진행중",contract:"계약완료",other:"타부동산 계약",done:"기타 종료"}[v] || "진행중";
+  }
+  function statusClass(v){
+    return {progress:"status-progress",contract:"status-contract",other:"status-other",done:"status-done"}[v] || "status-progress";
+  }
+  function renderCustomers(){
+    const arr = Object.entries(customers || {}).map(([id,v])=>({id,...v}))
+      .sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||"") || (b.date||"").localeCompare(a.date||""));
+    $("cntAll").textContent = arr.length;
+    $("cntProgress").textContent = arr.filter(x=>x.status==="progress").length;
+    $("cntContract").textContent = arr.filter(x=>x.status==="contract").length;
+    $("cntOther").textContent = arr.filter(x=>x.status==="other").length;
+    $("customerRows").innerHTML = arr.length ? arr.map(c => `
+      <tr class="${c.status==="contract"?"row-contract":c.status==="other"?"row-other":""}">
+        <td>${esc(c.date||"")}</td>
+        <td><b>${esc(c.name||"")}</b></td>
+        <td><span class="status ${statusClass(c.status)}">${statusLabel(c.status)}</span></td>
+        <td>${esc(c.deal||"")}</td>
+        <td style="max-width:360px;white-space:pre-wrap">${esc(c.core||"")}</td>
+        <td style="white-space:nowrap">${esc(c.phone||"")}</td>
+        <td style="white-space:pre-wrap">${esc(c.contractInfo||"")}</td>
+        <td style="white-space:pre-wrap">${esc(c.call||"")}</td>
+        <td>${esc(c.next||"")}</td>
+        <td><button class="btn editCustomer" data-id="${c.id}">수정</button></td>
+      </tr>`).join("") : '<tr><td colspan="10">등록된 고객이 없습니다.</td></tr>';
+    document.querySelectorAll(".editCustomer").forEach(b=>b.onclick=()=>openCustomer(b.dataset.id));
+  }
+
+  function openCustomer(id=null){
+    editingId=id;
+    const c=id ? customers[id] : {};
+    $("customerModalTitle").textContent=id?"고객 수정":"고객등록";
+    $("cDate").value=c.date || new Date().toISOString().slice(0,10);
+    $("cName").value=c.name || "";
+    $("cStatus").value=c.status || "progress";
+    $("cDeal").value=c.deal || "매매";
+    $("cPhone").value=c.phone || "";
+    $("cNext").value=c.next || "";
+    $("cCore").value=c.core || "";
+    $("cCall").value=c.call || "";
+    $("cContractInfo").value=c.contractInfo || "";
+    $("deleteCustomerBtn").style.display=id?"block":"none";
+    $("customerModal").classList.add("show");
+  }
+  function closeCustomer(){ $("customerModal").classList.remove("show"); editingId=null; }
+
+  $("addCustomerBtn").onclick=()=>openCustomer();
+  $("cancelCustomerBtn").onclick=closeCustomer;
+  $("customerModal").onclick=e=>{ if(e.target===$("customerModal")) closeCustomer(); };
+
+  $("saveCustomerBtn").onclick=async()=>{
+    if(!currentUser) return alert("로그인이 필요합니다.");
+    const name=$("cName").value.trim();
+    if(!name) return alert("고객명을 입력해주세요.");
+    const data={
+      date:$("cDate").value, name, status:$("cStatus").value, deal:$("cDeal").value,
+      phone:$("cPhone").value.trim(), next:$("cNext").value, core:$("cCore").value.trim(),
+      call:$("cCall").value.trim(), contractInfo:$("cContractInfo").value.trim(),
+      updatedAt:new Date().toISOString()
+    };
+    try{
+      if(editingId) await update(ref(db, `customers/${editingId}`), data);
+      else {
+        data.createdAt=new Date().toISOString();
+        await set(push(ref(db,"customers")), data);
+      }
+      closeCustomer();
+    }catch(e){ alert("저장 실패: "+e.message); }
+  };
+
+  $("deleteCustomerBtn").onclick=async()=>{
+    if(!editingId || !confirm("이 고객을 삭제할까요?")) return;
+    try{ await remove(ref(db,`customers/${editingId}`)); closeCustomer(); }
+    catch(e){ alert("삭제 실패: "+e.message); }
+  };
+
+  onAuthStateChanged(auth, user => {
+    currentUser=user;
+    if(unsubscribeCustomers){ unsubscribeCustomers(); unsubscribeCustomers=null; }
+    if(user){
+      unsubscribeCustomers=onValue(ref(db,"customers"), snap=>{
+        customers=snap.val() || {};
+        renderCustomers();
+      }, err=>{
+        $("customerRows").innerHTML=`<tr><td colspan="10">데이터 읽기 실패: ${esc(err.message)}</td></tr>`;
+      });
+    } else {
+      customers={}; renderCustomers();
+    }
+  });
 </script>
 
 <script>
@@ -127,5 +264,27 @@ document.querySelectorAll(".nav button[data-section]").forEach(btn => {
   };
 });
 </script>
+
+<div id="customerModal" class="modal">
+  <div class="modal-box">
+    <h2 id="customerModalTitle" style="margin-top:0">고객등록</h2>
+    <div class="form-grid">
+      <div class="field"><label>등록일</label><input id="cDate" type="date"></div>
+      <div class="field"><label>고객명</label><input id="cName" placeholder="고객명"></div>
+      <div class="field"><label>상태</label><select id="cStatus"><option value="progress">진행중/대기</option><option value="contract">계약완료</option><option value="other">타부동산 계약</option><option value="done">기타 종료</option></select></div>
+      <div class="field"><label>거래</label><select id="cDeal"><option>매매</option><option>전세</option><option>월세</option><option>기타</option></select></div>
+      <div class="field"><label>전화번호</label><input id="cPhone" placeholder="010-0000-0000"></div>
+      <div class="field"><label>다음 알림</label><input id="cNext" type="date"></div>
+      <div class="field full"><label>핵심조건</label><textarea id="cCore" placeholder="원하는 동·층·금액·입주일 등"></textarea></div>
+      <div class="field full"><label>최근 통화 / 안내내용</label><textarea id="cCall" placeholder="최근 통화 내용"></textarea></div>
+      <div class="field full"><label>계약 / 종료 정보</label><textarea id="cContractInfo" placeholder="계약금, 계약서 작성일, 잔금일 또는 종료 사유"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" id="deleteCustomerBtn" style="display:none">삭제</button>
+      <div style="margin-left:auto;display:flex;gap:8px"><button class="btn" id="cancelCustomerBtn">취소</button><button class="btn primary" id="saveCustomerBtn">저장</button></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
