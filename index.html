@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>포스코킹 업무플래너 v50 - 실시간 연동</title>
+<title>포스코킹 업무플래너 v50 - 계약핑크 자동반영 수정</title>
 <style>
 :root{
   --bg:#f4f7fb; --panel:#fff; --line:#dfe5ee; --text:#1f2937; --muted:#64748b;
@@ -11,23 +11,6 @@
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
-
-#loginOverlay{
-  position:fixed;inset:0;background:#0f172a;z-index:9999;
-  display:flex;align-items:center;justify-content:center;color:#fff;
-}
-.login-box{
-  background:#1e293b;padding:32px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.5);
-  text-align:center;max-width:360px;width:90%;
-}
-.login-box h2{margin-top:0;font-size:22px;color:#38bdf8}
-.login-box p{font-size:13px;color:#94a3b8;margin-bottom:24px;line-height:1.5}
-.btn-google{
-  background:#fff;color:#0f172a;border:none;padding:12px 20px;border-radius:8px;
-  font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;
-  justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-
 .app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
 .sidebar{background:#0f172a;color:#fff;padding:18px 14px}
 .brand{font-weight:800;font-size:20px;margin:6px 8px 18px}
@@ -102,8 +85,12 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .event.contract-completed-event .memo-line,
 .event.contract-completed-event .review-line{color:#fff!important}
 
-.month-marker{position:absolute;top:0;bottom:0;width:2px;background:#94a3b8;opacity:.7;z-index:5}
-.month-tag{position:absolute;top:2px;z-index:22;background:#0f172a;color:#fff;padding:2px 6px;border-radius:6px;font-size:10px}
+.month-marker{
+  position:absolute;top:0;bottom:0;width:2px;background:#94a3b8;opacity:.7;z-index:5
+}
+.month-tag{
+  position:absolute;top:2px;z-index:22;background:#0f172a;color:#fff;padding:2px 6px;border-radius:6px;font-size:10px
+}
 .zoom-note{font-size:12px;color:var(--muted);margin:7px 0 0}
 .fab{position:fixed;right:26px;bottom:24px;width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:30px;box-shadow:0 8px 18px rgba(14,165,233,.35);cursor:pointer}
 .modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);align-items:center;justify-content:center;z-index:50}
@@ -132,7 +119,11 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:11px;font-weight:700}
 .badge.sale{background:#fef08a}.badge.jeonse{background:#bbf7d0}.badge.monthly{background:#bae6fd}.badge.etc{background:#e5e7eb}
 .alert-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;margin-bottom:12px}
-.expiry-critical{background:#fff1f2;border:2px solid #fb7185;border-radius:12px;padding:12px;margin-bottom:12px}
+.alert-item{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #ffedd5;padding:9px 0}
+.alert-item:first-child{border-top:0}
+.expiry-critical{
+  background:#fff1f2;border:2px solid #fb7185;border-radius:12px;padding:12px;margin-bottom:12px
+}
 .expiry-critical .expiry-title{font-size:15px;font-weight:800;color:#9f1239}
 .expiry-critical .expiry-sub{font-size:11px;color:#881337;margin-top:3px}
 .expiry-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
@@ -143,24 +134,56 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:12px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.danger{color:#b91c1c}
+.customer-timeline{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.timeline-row{font-size:11px;color:#475569;margin:4px 0}
 
-.contract-tabs,.listing-tabs,.cash-tabs,.daylog-tabs,.customer-filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
-.contract-tabs button,.listing-tabs button,.cash-tabs button,.daylog-tabs button,.customer-filter-tabs button{border:1px solid var(--line);background:#fff;padding:8px 13px;border-radius:999px;font-weight:700;cursor:pointer}
-.contract-tabs button.active,.listing-tabs button.active,.cash-tabs button.active,.daylog-tabs button.active,.customer-filter-tabs button.active{background:#0f172a;color:#fff}
-.contract-card-grid,.listing-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.contract-card,.listing-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
-.contract-card h4,.listing-card h4{margin:0 0 8px;font-size:15px}
-.contract-card .row,.listing-card .row{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:4px 0;border-bottom:1px dashed #e5e7eb}
-.contract-card .row:last-child,.listing-card .row:last-child{border-bottom:0}
-.contract-card .label,.listing-card .label{color:var(--muted)}
-.contract-card .value,.listing-card .value{font-weight:700;text-align:right}
+.contract-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.contract-tabs button{border:1px solid var(--line);background:#fff;padding:9px 15px;border-radius:9px;font-weight:700;cursor:pointer}
+.contract-tabs button.active{outline:2px solid #0f172a}
+.contract-tabs .sale{background:#fef08a}
+.contract-tabs .jeonse{background:#bbf7d0}
+.contract-tabs .monthly{background:#bae6fd}
+.contract-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.contract-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.contract-card h4{margin:0 0 8px;font-size:15px}
+.contract-card .row{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:4px 0;border-bottom:1px dashed #e5e7eb}
+.contract-card .row:last-child{border-bottom:0}
+.contract-card .label{color:var(--muted)}
+.contract-card .value{font-weight:700;text-align:right}
+.contract-card.sale{border-top:5px solid #eab308}
+.contract-card.jeonse{border-top:5px solid #22c55e}
+.contract-card.monthly{border-top:5px solid #38bdf8}
+
+.listing-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.listing-tabs button{border:1px solid var(--line);background:#fff;padding:9px 15px;border-radius:9px;font-weight:700;cursor:pointer}
+.listing-tabs button.active{outline:2px solid #0f172a}
+.listing-tabs .sale{background:#fef08a}
+.listing-tabs .jeonse{background:#bbf7d0}
+.listing-tabs .monthly{background:#bae6fd}
+.listing-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.listing-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.listing-card.sale{border-top:5px solid #eab308}
+.listing-card.jeonse{border-top:5px solid #22c55e}
+.listing-card.monthly{border-top:5px solid #38bdf8}
+.listing-card .row{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:4px 0;border-bottom:1px dashed #e5e7eb}
+.listing-card .row:last-child{border-bottom:0}
+.listing-card .label{color:var(--muted)}
+.listing-card .value{font-weight:700;text-align:right}
 
 .cash-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
 .cash-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
 .cash-card .amt{font-size:22px;font-weight:800}
 .cash-card .lbl{font-size:12px;color:var(--muted)}
-.cash-card.income{background:#eff6ff}.cash-card.expense{background:#fff7ed}.cash-card.balance{background:#f0fdf4}
-.money-plus{color:#0369a1;font-weight:800}.money-minus{color:#c2410c;font-weight:800}
+.cash-card.income{background:#eff6ff}
+.cash-card.expense{background:#fff7ed}
+.cash-card.balance{background:#f0fdf4}
+.cash-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.cash-tabs button{border:1px solid var(--line);background:#fff;padding:8px 13px;border-radius:9px;font-weight:700;cursor:pointer}
+.cash-tabs button.active{background:#0f172a;color:#fff}
+.money-plus{color:#0369a1;font-weight:800}
+.money-minus{color:#c2410c;font-weight:800}
+
+
 
 .search-box{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .search-box input{flex:1;min-width:260px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;font-size:14px}
@@ -168,6 +191,8 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .search-result .kind{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;background:#e2e8f0;margin-right:6px}
 .backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .backup-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.backup-box h3{margin-top:0}
+.backup-status{font-size:12px;color:#64748b;margin-top:8px;line-height:1.5}
 .dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
 
 .dashboard-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
@@ -177,61 +202,123 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .diary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .diary-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
 .diary-box textarea{width:100%;min-height:110px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;box-sizing:border-box}
+.diary-date{font-size:12px;color:#64748b;margin-bottom:8px}
+.diary-saved{font-size:11px;color:#16a34a;font-weight:700;margin-left:8px}
+.daylog-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.daylog-tabs button{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:9px;font-weight:700;cursor:pointer}
+.daylog-tabs button.active{background:#0f172a;color:#fff}
 .daylog-list{display:grid;gap:10px}
 .daylog-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.daylog-card .date{font-size:15px;font-weight:800}
+.daylog-card .summary{font-size:11px;color:#64748b;margin-top:3px}
 .daylog-card .body{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .daylog-card .entry{background:#f8fafc;border-radius:10px;padding:10px;font-size:12px;white-space:pre-wrap;line-height:1.5}
+.daylog-card .entry b{display:block;margin-bottom:5px}
+.daylog-card .events{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+.daylog-card .ev{font-size:11px;margin:4px 0}
+.daylog-empty{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;color:#64748b;text-align:center}
+@media(max-width:700px){.daylog-card .body{grid-template-columns:1fr}}
+@media(max-width:700px){.diary-grid{grid-template-columns:1fr}.diary-box textarea{min-height:90px}}
 .todo-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.todo-row:last-child{border-bottom:0}
 .match-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .match-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
 .match-score{display:inline-block;background:#0f172a;color:#fff;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}
+.match-reason{font-size:11px;color:#64748b;margin-top:5px}
 .quick-buttons{display:flex;gap:8px;flex-wrap:wrap}
 .quick-buttons button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;cursor:pointer}
 .routine-top{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-bottom:12px}
+
 .routine-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
 .routine-progress{height:18px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:8px 0}
 .routine-progress > div{height:100%;background:#0ea5e9;border-radius:999px}
 .routine-list{display:grid;gap:8px}
 .routine-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .routine-item.done{background:#f0fdf4}
-.graph-grid,.routine-individual-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.graph-box,.routine-individual-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
-.bar-row,.routine-mini-bar{display:grid;grid-template-columns:100px 1fr 54px;gap:8px;align-items:center;margin:10px 0}
-.bar-track,.routine-mini-track{height:20px;background:#e5e7eb;border-radius:999px;overflow:hidden}
-.bar-fill,.routine-mini-fill{height:100%;background:#0ea5e9;border-radius:999px}
+.routine-item input[type="checkbox"]{width:20px;height:20px}
+.routine-item .name{font-weight:700}
+.routine-item .rate{font-size:12px;color:var(--muted)}
+.graph-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.graph-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.bar-row{display:grid;grid-template-columns:100px 1fr 54px;gap:8px;align-items:center;margin:10px 0}
+.bar-track{height:20px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.bar-fill{height:100%;background:#0ea5e9;border-radius:999px}
+.bar-label{font-size:12px;font-weight:700}
+.bar-value{font-size:12px;text-align:right;font-weight:800}
+.routine-individual-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.routine-individual-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.routine-individual-card h4{margin:0 0 10px;font-size:15px}
+.routine-mini-bar{display:grid;grid-template-columns:86px 1fr 48px;gap:8px;align-items:center;margin:8px 0}
+.routine-mini-track{height:18px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.routine-mini-fill{height:100%;background:#0ea5e9;border-radius:999px}
+.routine-mini-label{font-size:11px;font-weight:700}
+.routine-mini-value{font-size:11px;font-weight:800;text-align:right}
 .routine-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .rcell{border:1px solid var(--line);border-radius:8px;padding:6px;min-height:58px;font-size:11px;background:#fff}
+.rcell .pct{font-weight:800;margin-top:4px}
 .rcell.good{background:#dcfce7}.rcell.mid{background:#fef9c3}.rcell.low{background:#fee2e2}.rcell.empty{background:#f8fafc;color:#94a3b8}
-.schedule-summary{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:8px;margin:8px 0 12px}
-.schedule-summary-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+.routine-controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.routine-controls button,.routine-controls input{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 10px}
+
+.crm-table tr.contract-done td{background:#ffe4ea}
+.crm-table tr.contract-done td:first-child{border-left:5px solid #f43f5e}
+.crm-table tr.customer-ended td{background:#f1f5f9;color:#64748b}
+.crm-table tr.customer-ended td:first-child{border-left:4px solid #94a3b8}
+.crm-table tr.customer-ended b{color:#475569}
+.crm-table tr.customer-lost td{background:#fafafa;color:#94a3b8}
+.crm-table tr.customer-lost td:first-child{border-left:3px solid #d1d5db}
+.crm-table tr.customer-lost b{color:#64748b}
+.contract-progress{margin-top:5px;padding:6px 8px;border-radius:8px;background:#ffd6df;color:#881337;font-size:11px;line-height:1.45}
+.contract-progress b{color:#9f1239}
+.customer-filter-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+.customer-filter-tabs button{border:1px solid var(--line);background:#fff;padding:8px 13px;border-radius:9px;font-weight:700;cursor:pointer}
+.customer-filter-tabs button.active{background:#0f172a;color:#fff;border-color:#0f172a}
+.end-info{margin-top:4px;padding:5px 7px;border-radius:7px;background:#e2e8f0;color:#475569;font-size:10px;line-height:1.45}
+@media(max-width:1100px){
+
+  .crm-grid{grid-template-columns:1fr 1fr}
+  .contract-card-grid,.listing-card-grid{grid-template-columns:1fr 1fr}
+  .cash-summary{grid-template-columns:1fr 1fr}
+  .routine-top,.graph-grid,.routine-individual-grid{grid-template-columns:1fr}
+}
+
+
+
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:8px}
+  .crm-grid{grid-template-columns:1fr 1fr}
+  .event{font-size:11px;padding:5px}
+  .event strong{font-size:11px}
+  .event .meta,.event .phone-line,.event .memo-line,.event .review-line{font-size:10px}
+}
+
+
+.schedule-summary{
+  display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:8px;margin:8px 0 12px
+}
+.schedule-summary-card{
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;box-shadow:0 2px 8px rgba(15,23,42,.05)
+}
 .schedule-summary-card .n{font-size:19px;font-weight:900}
 .schedule-summary-card .l{font-size:11px;color:#64748b;margin-top:2px}
 .schedule-summary-card.contract{background:#ffe0e9;border-color:#fb7185}
 .schedule-summary-card.contract .n,.schedule-summary-card.contract .l{color:#be123c}
+.contract-completed-event{color:#fff!important;border-left-color:#be123c!important;box-shadow:0 2px 8px rgba(190,18,60,.28)!important}
+.contract-completed-event .meta,.contract-completed-event .phone-line,.contract-completed-event .memo-line,.contract-completed-event .review-line{color:#fff!important}
 .year-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px;background:#f8fafc}
 .year-month-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow);cursor:pointer;min-height:150px}
-.crm-table tr.contract-done td{background:#ffe4ea}
-.crm-table tr.contract-done td:first-child{border-left:5px solid #f43f5e}
+.year-month-card:hover{outline:2px solid #0ea5e9}
+.year-month-card .ym-title{display:flex;justify-content:space-between;align-items:center;font-weight:900;font-size:16px;margin-bottom:8px}
+.year-month-card .ym-counts{font-size:11px;color:#64748b;display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.year-month-card .ym-event{font-size:11px;line-height:1.4;padding:4px 6px;border-radius:7px;background:#f8fafc;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.year-month-card .ym-event.contract{background:#ec2f69;color:#fff;font-weight:800}
+.year-empty{color:#94a3b8;font-size:11px;padding:8px 0}
+@media(max-width:1100px){.schedule-summary{grid-template-columns:repeat(3,1fr)}.year-overview{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.schedule-summary{grid-template-columns:repeat(2,1fr)}.year-overview{grid-template-columns:1fr}}
 
-@media(max-width:1100px){.crm-grid,.contract-card-grid,.listing-card-grid,.cash-summary,.routine-top,.graph-grid,.routine-individual-grid{grid-template-columns:1fr}}
-@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:8px}}
-.crm-table th:nth-child(5), .crm-table td:nth-child(5){min-width:220px;white-space:normal;}
-.crm-table th:nth-child(6), .crm-table td:nth-child(6){min-width:130px;white-space:nowrap;}
 </style>
 </head>
 <body>
-
-<div id="loginOverlay">
-  <div class="login-box">
-    <h2>포스코킹 업무플래너 v50</h2>
-    <p>구글 로그인 후 PC와 스마트폰에서 실시간 연동하여 이용하세요.</p>
-    <button class="btn-google" id="loginBtn">
-      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-      Google 계정으로 로그인
-    </button>
-  </div>
-</div>
-
 <div class="app">
   <aside class="sidebar">
     <div class="brand">포스코킹 업무플래너</div>
@@ -250,127 +337,393 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
       <button data-section="backup">💾 백업·복원</button>
       <button data-section="stats">📊 업무통계</button>
     </div>
-    <div style="margin-top:20px;padding:10px 8px;border-top:1px solid #334155">
-      <div id="userEmail" style="font-size:11px;color:#94a3b8;word-break:break-all;margin-bottom:8px"></div>
-      <button id="logoutBtn" class="btn danger" style="width:100%;display:none">로그아웃</button>
-    </div>
   </aside>
 
   <main class="main">
+
     <section id="dashboard" class="section active">
       <div class="topbar">
         <div>
           <div class="title">오늘의 업무 대시보드</div>
-          <div class="sub">실시간 클라우드 동기화 연결됨</div>
+          <div class="sub">프로그램을 켜면 오늘 업무 + 만기 6개월 고객 + 후속 연락을 가장 먼저 보여줍니다.</div>
         </div>
         <div class="controls">
           <button class="btn" id="enableBrowserNotifyBtn">🔔 내 알림 켜기</button>
           <button class="primary btn" id="refreshDashboardBtn">새로고침</button>
         </div>
       </div>
+
       <div id="dashboardSummary" class="dashboard-grid"></div>
-      <div class="dashboard-section"><b>오늘 시간별 업무</b><div id="dashboardTodayEvents"></div></div>
-      <div class="dashboard-section"><b>오늘 꼭 확인할 것</b><div id="dashboardTodo"></div></div>
-      <div class="dashboard-section"><b>오늘 루틴</b><span id="dashboardRoutinePct"></span><div id="dashboardRoutine"></div></div>
+
+      <div class="dashboard-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b>오늘 시간별 업무</b>
+          <span style="font-size:12px;color:#64748b">완료/예정 포함</span>
+        </div>
+        <div id="dashboardTodayEvents"></div>
+      </div>
+
+      <div class="dashboard-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b>오늘 꼭 확인할 것</b>
+          <span style="font-size:12px;color:#64748b">후속관리 · 만기 · 미처리</span>
+        </div>
+        <div id="dashboardTodo"></div>
+      </div>
+
+      <div class="dashboard-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b>오늘 루틴</b>
+          <span id="dashboardRoutinePct" style="font-size:12px;color:#64748b"></span>
+        </div>
+        <div id="dashboardRoutine"></div>
+      </div>
+
       <div class="dashboard-section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div><b>🌙 하루 마무리</b><div id="diaryDateLabel"></div></div>
-          <div><button class="btn primary" id="saveDiaryBtn">오늘 기록 저장</button><span id="diarySaved" style="color:#16a34a;font-weight:700;margin-left:8px"></span></div>
+          <div>
+            <b>🌙 하루 마무리</b>
+            <div id="diaryDateLabel" class="diary-date"></div>
+          </div>
+          <div>
+            <button class="btn primary" id="saveDiaryBtn">오늘 기록 저장</button>
+            <span id="diarySaved" class="diary-saved"></span>
+          </div>
         </div>
         <div class="diary-grid">
-          <div class="diary-box"><b>📝 오늘의 기록</b><textarea id="diaryRecord" placeholder="오늘 있었던 일..."></textarea></div>
-          <div class="diary-box"><b>🙏 오늘 감사한 일</b><textarea id="diaryThanks" placeholder="오늘 감사했던 일..."></textarea></div>
+          <div class="diary-box">
+            <b>📝 오늘의 기록</b>
+            <div style="font-size:11px;color:#64748b;margin:4px 0 8px">오늘 있었던 일이나 느낌을 짧게 남겨보세요.</div>
+            <textarea id="diaryRecord" placeholder="오늘 있었던 일, 기억하고 싶은 일, 느낀 점..."></textarea>
+          </div>
+          <div class="diary-box">
+            <b>🙏 오늘 감사한 일</b>
+            <div style="font-size:11px;color:#64748b;margin:4px 0 8px">오늘 감사했던 일을 하나라도 적어보세요.</div>
+            <textarea id="diaryThanks" placeholder="오늘 감사했던 일..."></textarea>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section id="schedule" class="section">
-      <div class="topbar">
-        <div><div class="title">24시간 연속 시간축 스케줄</div></div>
-        <div class="controls">
-          <button id="prevBtn">◀</button><button id="todayBtn">오늘</button><button id="nextBtn">▶</button>
-          <input id="datePick" type="date">
-          <select id="zoomSel"><option value="90">넓게</option><option value="70" selected>보통</option><option value="52">촘촘하게</option><option value="38">연간 압축</option></select>
+      <div class="dashboard-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b>빠른 실행</b>
+        </div>
+        <div class="quick-buttons">
+          <button onclick="goSection('schedule')">＋ 일정 등록</button>
+          <button onclick="goSection('customers')">＋ 고객 관리</button>
+          <button onclick="goSection('listings')">＋ 매물 관리</button>
+          <button onclick="goSection('contracts')">＋ 계약 관리</button>
+          <button onclick="goSection('cashbook')">＋ 가계부</button>
         </div>
       </div>
-      <div class="viewtabs">
-        <button data-view="day" class="active">하루</button><button data-view="week">일주일</button><button data-view="month">한달</button><button data-view="year">1년</button>
-      </div>
-      <div id="scheduleSummary" class="schedule-summary"></div>
-      <div class="panel"><div id="boardWrap" class="board-wrap"><div id="content"></div></div></div>
-    </section>
-
-    <section id="customers" class="section">
-      <div class="topbar"><div><div class="title">고객관리</div></div><div class="controls"><button class="primary btn" id="addCustomerBtn">＋ 고객등록</button></div></div>
-      <div id="customerSummary" class="crm-grid"></div>
-      <div id="customerTable"></div>
-    </section>
-
-    <section id="listings" class="section">
-      <div class="topbar"><div><div class="title">접수매물</div></div><div class="controls"><button class="primary btn" id="addListingBtn">＋ 매물등록</button></div></div>
-      <div id="listingSummary" class="crm-grid"></div>
-      <div id="listingList"></div>
     </section>
 
     <section id="matching" class="section">
-      <div class="topbar"><div><div class="title">고객 · 매물 자동매칭</div></div></div>
+      <div class="topbar">
+        <div>
+          <div class="title">고객 · 매물 자동매칭</div>
+          <div class="sub">접수매물과 고객 희망조건을 비교해서 연결 가능성이 높은 조합을 보여줍니다.</div>
+        </div>
+        <div class="controls"><button class="primary btn" id="refreshMatchingBtn">다시 매칭</button></div>
+      </div>
+      <div class="alert-box">
+        <b>자동매칭 기준</b><br>
+        거래유형 일치 + 고객 희망조건과 매물명/메모의 공통 키워드 + 상태를 바탕으로 우선순위를 계산합니다.
+      </div>
       <div id="matchingSummary" class="crm-grid"></div>
       <div id="matchingList" class="match-grid"></div>
     </section>
 
+    <section id="schedule" class="section">
+    <div class="topbar">
+      <div>
+        <div class="title">24시간 연속 시간축 스케줄</div>
+        <div class="sub">매매=노랑 · 전세=초록 · 월세=하늘 / 고객·업무·메모·후기까지 한눈에</div>
+      </div>
+      <div class="controls">
+        <button id="prevBtn">◀</button>
+        <button id="todayBtn">오늘</button>
+        <button id="nextBtn">▶</button>
+        <input id="datePick" type="date">
+        <select id="zoomSel">
+          <option value="90">넓게</option>
+          <option value="70" selected>보통</option>
+          <option value="52">촘촘하게</option>
+          <option value="38">연간 압축</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="viewtabs">
+      <button data-view="day" class="active">하루</button>
+      <button data-view="week">일주일</button>
+      <button data-view="month">한달</button>
+      <button data-view="year">1년</button>
+    </div>
+
+    <div class="legend">
+      <span><i class="dot" style="background:#f43f7d"></i><b style="color:#be123c">계약완료</b></span>
+      <span><i class="dot" style="background:#fef08a"></i><b>매매</b></span>
+      <span><i class="dot" style="background:#bbf7d0"></i><b>전세</b></span>
+      <span><i class="dot" style="background:#bae6fd"></i><b>월세</b></span>
+      <span><i class="dot" style="background:#e5e7eb"></i>기타</span>
+      <span style="margin-left:8px;color:#64748b">카드 색상 = 거래유형 / 업무종류가 계약이거나 계약완료 고객과 연결된 일정 = 선명한 핑크</span>
+    </div>
+    <div id="scheduleSummary" class="schedule-summary"></div>
+
+    <div class="panel">
+      <div id="boardWrap" class="board-wrap">
+        <div id="content"></div>
+      </div>
+    </div>
+    <div class="zoom-note">※ 하루·일주일은 상세 시간축, 한달은 압축 시간축, 1년은 12개월 요약으로 보여줍니다. 핑크색은 실제 계약완료 고객과 연결된 일정입니다.</div>
+    </section>
+
+    <section id="customers" class="section">
+      <div class="topbar">
+        <div>
+          <div class="title">고객관리</div>
+          <div class="sub">한 번 입력하면 자동 연결됩니다. 후속관리의 다음 약속 날짜·시간을 저장하면 일정표에도 자동 등록되고, 수정·종료하면 일정도 함께 정리됩니다.</div>
+        </div>
+        <div class="controls"><button class="primary btn" id="addCustomerBtn">＋ 고객등록</button></div>
+      </div>
+      <div id="customerSummary" class="crm-grid"></div>
+      <div class="customer-status-legend" style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0 12px;font-size:12px;font-weight:700">
+        <span data-customer-view="active" onclick="setCustomerViewFilter('active')" style="padding:6px 10px;border-radius:999px;background:#eff6ff;color:#1d4ed8">● 진행중/대기</span>
+        <span data-customer-view="contract" onclick="setCustomerViewFilter('contract')" style="padding:6px 10px;border-radius:999px;background:#ffd9e2;color:#be123c">● 계약완료</span>
+        <span data-customer-view="lost" onclick="setCustomerViewFilter('lost')" style="padding:6px 10px;border-radius:999px;background:#f8fafc;color:#94a3b8">● 타부동산 계약</span>
+        <span data-customer-view="ended" onclick="setCustomerViewFilter('ended')" style="padding:6px 10px;border-radius:999px;background:#f1f5f9;color:#64748b">● 기타 종료</span>
+        <span data-customer-view="all" onclick="setCustomerViewFilter('all')" style="padding:6px 10px;border-radius:999px;background:#fff;color:#334155;border:1px solid #cbd5e1">● 전체보기</span>
+      </div>
+      <div id="customerTable"></div>
+    </section>
+
+    <section id="listings" class="section">
+      <div class="topbar">
+        <div>
+          <div class="title">접수매물</div>
+          <div class="sub">전화로 받은 매물을 한눈에 보고, 일정의 ‘매물접수’ 기록과 자동 연결합니다.</div>
+        </div>
+        <div class="controls"><button class="primary btn" id="addListingBtn">＋ 매물등록</button></div>
+      </div>
+      <div id="listingSummary" class="crm-grid"></div>
+      <div class="listing-tabs">
+        <button class="sale active" data-listing-filter="매매">🟨 매매</button>
+        <button class="jeonse" data-listing-filter="전세">🟩 전세</button>
+        <button class="monthly" data-listing-filter="월세">🟦 월세</button>
+        <button data-listing-filter="전체">전체</button>
+      </div>
+      <div id="listingList"></div>
+    </section>
+
     <section id="expiry" class="section">
-      <div class="topbar"><div><div class="title">만기관리</div></div></div>
+      <div class="topbar">
+        <div>
+          <div class="title">만기관리</div>
+          <div class="sub">전세·월세 계약완료에서 입력한 만기일을 자동 연결해 6개월 전부터 관리합니다.</div>
+        </div>
+      </div>
+      <div class="alert-box">
+        <b>기본 원칙</b><br>
+        최초 관리 시작: 만기 6개월 전 → <b>내 대시보드 알림 + 고객 문자 버튼</b><br>
+        통화 후: 통화내용 기록 → <b>다음 알림 날짜 + 알림대상(없음 / 나 / 나+고객)</b> 직접 선택<br>
+        <span style="font-size:11px;color:#9a3412">※ 실제 고객 SMS 자동발송은 외부 문자서비스 연결 전까지 ‘고객 문자’ 버튼으로 전송합니다.</span>
+      </div>
       <div id="expiryAlerts"></div>
       <div id="expiryTable"></div>
     </section>
 
     <section id="contracts" class="section">
-      <div class="topbar"><div><div class="title">계약완료</div></div><div class="controls"><button class="primary btn" id="addContractBtn">＋ 계약등록</button></div></div>
+      <div class="topbar">
+        <div>
+          <div class="title">계약완료</div>
+          <div class="sub">매매 · 전세 · 월세 계약을 한눈에 보고, 전세·월세는 만기 6개월 관리와 자동 연결합니다.</div>
+        </div>
+        <div class="controls"><button class="primary btn" id="addContractBtn">＋ 계약등록</button></div>
+      </div>
       <div id="contractSummary" class="crm-grid"></div>
+      <div class="contract-tabs">
+        <button class="sale active" data-contract-filter="매매">🟨 매매 계약완료</button>
+        <button class="jeonse" data-contract-filter="전세">🟩 전세 계약완료</button>
+        <button class="monthly" data-contract-filter="월세">🟦 월세 계약완료</button>
+        <button data-contract-filter="전체">전체</button>
+      </div>
       <div id="contractList"></div>
     </section>
 
     <section id="cashbook" class="section">
-      <div class="topbar"><div><div class="title">가계부</div></div><div class="controls"><button class="primary btn" id="addCashBtn">＋ 입출금 등록</button></div></div>
+      <div class="topbar">
+        <div>
+          <div class="title">가계부</div>
+          <div class="sub">그날의 입금 · 지출을 기록하고 일 · 주 · 월 · 년으로 합계를 확인합니다.</div>
+        </div>
+        <div class="controls"><button class="primary btn" id="addCashBtn">＋ 입출금 등록</button></div>
+      </div>
       <div id="cashSummary" class="cash-summary"></div>
+      <div class="cash-tabs">
+        <button data-cash-view="day" class="active">일</button>
+        <button data-cash-view="week">주</button>
+        <button data-cash-view="month">월</button>
+        <button data-cash-view="year">년</button>
+      </div>
+      <div class="controls" style="margin-bottom:10px">
+        <button id="cashPrevBtn">◀</button>
+        <button id="cashTodayBtn">오늘</button>
+        <button id="cashNextBtn">▶</button>
+        <input id="cashDatePick" type="date">
+      </div>
       <div id="cashList"></div>
     </section>
 
     <section id="routine" class="section">
-      <div class="topbar"><div><div class="title">하루루틴</div></div><div class="controls"><button class="primary btn" id="addRoutineBtn">＋ 루틴추가</button></div></div>
-      <div id="routineList" class="routine-list"></div>
+      <div class="topbar">
+        <div>
+          <div class="title">하루루틴</div>
+          <div class="sub">매일 실천한 루틴을 체크하고, 주·월 단위 달성률을 그래프로 비교합니다.</div>
+        </div>
+        <div class="controls"><button class="primary btn" id="addRoutineBtn">＋ 루틴추가</button></div>
+      </div>
+
+      <div class="routine-controls">
+        <button id="routinePrevBtn">◀</button>
+        <button id="routineTodayBtn">오늘</button>
+        <button id="routineNextBtn">▶</button>
+        <input id="routineDatePick" type="date">
+      </div>
+
+      <div class="routine-top">
+        <div class="routine-box">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><b id="routineDateLabel">오늘의 루틴</b><div style="font-size:12px;color:#64748b">체크하면 자동 저장됩니다.</div></div>
+            <div style="font-size:24px;font-weight:800" id="routinePct">0%</div>
+          </div>
+          <div class="routine-progress"><div id="routineProgressBar" style="width:0%"></div></div>
+          <div id="routineList" class="routine-list"></div>
+        </div>
+
+        <div class="routine-box">
+          <b>루틴별 실천율</b>
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px">최근 30일 기준</div>
+          <div id="routineRates"></div>
+        </div>
+      </div>
+
+      <div class="graph-grid">
+        <div class="graph-box">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <b>주간 비교</b>
+            <span style="font-size:12px;color:#64748b">이번 주 ↔ 다음 주</span>
+          </div>
+          <div id="weeklyGraph"></div>
+        </div>
+        <div class="graph-box">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <b>월간 비교</b>
+            <span style="font-size:12px;color:#64748b">이번 달 ↔ 다음 달</span>
+          </div>
+          <div id="monthlyGraph"></div>
+        </div>
+      </div>
+
+      <div class="routine-box" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <b>루틴 목표별 개별 그래프</b>
+          <span style="font-size:12px;color:#64748b">각 목표마다 주·월 달성률을 따로 확인</span>
+        </div>
+        <div id="routineIndividualGraphs" class="routine-individual-grid"></div>
+      </div>
+
+      <div class="routine-box" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b>이번 달 달성률 달력</b>
+          <span style="font-size:12px;color:#64748b">초록=80%↑ · 노랑=50~79% · 빨강=49%↓</span>
+        </div>
+        <div id="routineMonthCalendar"></div>
+      </div>
     </section>
 
+
     <section id="daylog" class="section">
-      <div class="topbar"><div><div class="title">나의 하루기록</div></div></div>
+      <div class="topbar">
+        <div>
+          <div class="title">나의 하루기록</div>
+          <div class="sub">오늘의 기록 · 감사한 일 · 루틴 달성률 · 그날의 주요 업무를 날짜별로 모아봅니다.</div>
+        </div>
+      </div>
+
+      <div class="daylog-tabs">
+        <button data-daylog-view="today" class="active">오늘</button>
+        <button data-daylog-view="week">이번 주</button>
+        <button data-daylog-view="month">이번 달</button>
+        <button data-daylog-view="year">올해</button>
+        <button data-daylog-view="all">전체</button>
+      </div>
+
+      <div class="controls" style="margin-bottom:10px">
+        <button id="daylogPrevBtn">◀</button>
+        <button id="daylogTodayBtn">오늘</button>
+        <button id="daylogNextBtn">▶</button>
+        <input id="daylogDatePick" type="date">
+      </div>
+
+      <div id="daylogSummary" class="crm-grid"></div>
       <div id="daylogList" class="daylog-list"></div>
     </section>
 
     <section id="search" class="section">
-      <div class="topbar"><div><div class="title">통합검색</div></div></div>
-      <div class="search-box"><input id="globalSearchInput" placeholder="검색어 입력..."><button class="btn primary" id="globalSearchBtn">검색</button></div>
+      <div class="topbar">
+        <div>
+          <div class="title">통합검색</div>
+          <div class="sub">고객명 · 전화번호 · 매물명 · 동호수 · 메모 · 후기 · 계약내용 · 가계부까지 한 번에 찾습니다.</div>
+        </div>
+      </div>
+      <div class="search-box">
+        <input id="globalSearchInput" placeholder="예: 김주환 / 201-704 / 010-5168 / 34A / 제이티플라자">
+        <button class="btn primary" id="globalSearchBtn">검색</button>
+        <button class="btn" id="globalSearchClear">초기화</button>
+      </div>
+      <div id="searchSummary" class="crm-grid"></div>
       <div id="searchResults"></div>
     </section>
 
     <section id="backup" class="section">
-      <div class="topbar"><div><div class="title">백업 · 복원</div></div></div>
+      <div class="topbar">
+        <div>
+          <div class="title">백업 · 복원</div>
+          <div class="sub">1년치 업무기록을 파일 하나로 안전하게 보관하고, 다른 PC에서도 그대로 복원합니다.</div>
+        </div>
+      </div>
+
+      <div class="alert-box">
+        <b>중요</b><br>
+        현재 프로그램은 브라우저 저장공간에 데이터를 보관합니다. 실제 업무기록을 계속 사용할 경우 정기적으로 백업파일을 만들어 두는 것을 권장합니다.
+      </div>
+
       <div class="backup-grid">
         <div class="backup-box">
           <h3>💾 전체 백업</h3>
-          <p style="font-size:12px;color:var(--muted)">내 계정에 저장된 모든 데이터를 파일(.json)로 저장합니다.</p>
-          <button class="btn primary" onclick="exportBackup()">백업파일 만들기</button>
+          <p style="font-size:13px;color:#64748b">일정, 고객, 접수매물, 후속관리, 만기, 계약, 가계부, 루틴 기록을 하나의 JSON 파일로 저장합니다.</p>
+          <button class="btn primary" id="exportBackupBtn">전체 백업파일 만들기</button>
+          <div id="backupExportStatus" class="backup-status"></div>
         </div>
+
         <div class="backup-box">
           <h3>♻️ 전체 복원</h3>
-          <p style="font-size:12px;color:var(--muted)">갖고 계신 .json 파일(백업파일)을 선택해 복원합니다.</p>
-          <input type="file" id="importFile" accept=".json">
-          <button class="btn primary" style="margin-top:8px" onclick="importBackup()">데이터 복원 실행</button>
+          <p style="font-size:13px;color:#64748b">이 프로그램에서 만든 백업파일을 선택하면 저장된 기록을 다시 불러옵니다.</p>
+          <input type="file" id="importBackupFile" accept=".json,application/json">
+          <div style="margin-top:8px"><button class="btn primary" id="importBackupBtn">선택한 파일 복원</button></div>
+          <div id="backupImportStatus" class="backup-status"></div>
         </div>
+      </div>
+
+      <div class="backup-box" style="margin-top:12px">
+        <h3>현재 저장된 데이터</h3>
+        <div id="backupDataSummary" class="crm-grid"></div>
       </div>
     </section>
 
     <section id="stats" class="section">
-      <div class="topbar"><div><div class="title">업무통계</div></div></div>
+      <div class="topbar"><div><div class="title">업무통계</div><div class="sub">현재 저장된 일정과 고객 데이터를 간단히 요약합니다.</div></div></div>
       <div id="statsGrid" class="crm-grid"></div>
     </section>
   </main>
@@ -378,136 +731,2483 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 
 <button class="fab" id="addBtn">＋</button>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyD_R1BqvCu6-6G50n8trya1OKb-u3oLAmU",
-    authDomain: "king-planner.firebaseapp.com",
-    databaseURL: "https://king-planner-default-rtdb.firebaseio.com",
-    projectId: "king-planner",
-    storageBucket: "king-planner.firebasestorage.app",
-    messagingSenderId: "528213755452",
-    appId: "1:528213755452:web:b63377864a671f4955e539"
-  };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-  const provider = new GoogleAuthProvider();
 
-  let currentUser = null;
 
-  document.getElementById("loginBtn").onclick = () => signInWithPopup(auth, provider).catch(e => alert("로그인 실패: " + e.message));
-  document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.reload());
 
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      currentUser = user;
-      document.getElementById("loginOverlay").style.display = "none";
-      document.getElementById("userEmail").textContent = user.email;
-      document.getElementById("logoutBtn").style.display = "block";
+<div class="modal" id="routineModal">
+  <div class="dialog">
+    <h3>루틴 추가</h3>
+    <div class="formgrid">
+      <div class="full"><label>루틴 이름<input id="rtName" placeholder="예: 아침 매물 확인"></label></div>
+      <div><label>분류<select id="rtCategory">
+        <option>업무</option><option>고객관리</option><option>홍보</option><option>정리</option><option>개인</option>
+      </select></label></div>
+      <div><label>반복<select id="rtRepeat">
+        <option value="daily">매일</option>
+        <option value="weekday">평일</option>
+        <option value="weekend">주말</option>
+      </select></label></div>
+    </div>
+    <div class="actions">
+      <button id="cancelRoutineBtn">취소</button>
+      <button class="save" id="saveRoutineBtn">저장</button>
+    </div>
+  </div>
+</div>
 
-      onValue(ref(db, 'users/' + user.uid), (snapshot) => {
-        const data = snapshot.val() || {};
-        if (data.events) window.events = data.events;
-        if (data.customers) window.customers = data.customers;
-        if (data.listings) window.listings = data.listings;
-        if (data.contracts) window.contracts = data.contracts;
-        if (data.cashEntries) window.cashEntries = data.cashEntries;
-        if (data.routines) window.routines = data.routines;
-        if (data.routineChecks) window.routineChecks = data.routineChecks;
-        if (data.diaryEntries) window.diaryEntries = data.diaryEntries;
+<div class="modal" id="cashModal">
+  <div class="dialog">
+    <h3 id="cashModalTitle">입출금 등록</h3>
+    <div class="formgrid">
+      <div><label>날짜<input id="cbDate" type="date"></label></div>
+      <div><label>구분<select id="cbType"><option value="income">입금</option><option value="expense">지출</option></select></label></div>
+      <div><label>금액<input id="cbAmount" type="number" min="0" step="1000" placeholder="예: 300000"></label></div>
+      <div><label>분류<select id="cbCategory">
+        <option>중개보수</option><option>광고비</option><option>식비</option><option>교통비</option>
+        <option>사무용품</option><option>관리비</option><option>통신비</option><option>세금/공과금</option>
+        <option>기타수입</option><option>기타지출</option>
+      </select></label></div>
+      <div class="full"><label>내용<input id="cbTitle" placeholder="예: 전세계약 중개보수 입금 / 명함 제작비"></label></div>
+      <div class="full"><label>메모<textarea id="cbMemo" placeholder="상세내용, 관련 고객/계약, 결제수단 등"></textarea></label></div>
+    </div>
+    <div class="actions">
+      <button id="deleteCashBtn" style="display:none;margin-right:auto;color:#b91c1c">삭제</button>
+      <button id="cancelCashBtn">취소</button>
+      <button class="save" id="saveCashBtn">저장</button>
+    </div>
+  </div>
+</div>
 
-        if (typeof window.renderAllCRM === 'function') window.renderAllCRM();
-        if (typeof window.render === 'function') window.render();
-      });
-    } else {
-      document.getElementById("loginOverlay").style.display = "flex";
-    }
-  });
+<div class="modal" id="listingModal">
+  <div class="dialog">
+    <h3 id="listingModalTitle">접수매물 등록</h3>
+    <div class="formgrid">
+      <div><label>거래유형<select id="lsDeal"><option>매매</option><option>전세</option><option>월세</option></select></label></div>
+      <div><label>접수일<input id="lsDate" type="date"></label></div>
+      <div class="full"><label>물건명 / 동·호수<input id="lsProperty" placeholder="제이티플라자 504호"></label></div>
+      <div><label>상태<select id="lsStatus"><option>공실</option><option>거주중</option><option>입주협의</option><option>기타</option></select></label></div>
+      <div><label>소유자명<input id="lsOwner" placeholder="주인 / 임대인"></label></div>
+      <div><label>소유자 연락처<input id="lsPhone" placeholder="010-0000-0000"></label></div>
 
-  window.syncToCloud = function() {
-    if (!currentUser) return;
-    set(ref(db, 'users/' + currentUser.uid), {
-      events: window.events || [],
-      customers: window.customers || [],
-      listings: window.listings || [],
-      contracts: window.contracts || [],
-      cashEntries: window.cashEntries || [],
-      routines: window.routines || [],
-      routineChecks: window.routineChecks || {},
-      diaryEntries: window.diaryEntries || {}
-    });
-  };
-</script>
+      <div id="lsSaleWrap" class="full"><label>매매가<input id="lsSalePrice" placeholder="예: 5억8천"></label></div>
+      <div id="lsDepositWrap"><label>보증금<input id="lsDeposit" placeholder="예: 3000"></label></div>
+      <div id="lsRentWrap"><label>월세<input id="lsRent" placeholder="예: 120"></label></div>
+
+      <div class="full"><label>메모 / 특징<textarea id="lsMemo" placeholder="조 / 방향 / 집보기 가능시간 / 특이사항"></textarea></label></div>
+    </div>
+    <div class="actions">
+      <button id="deleteListingBtn" style="display:none;margin-right:auto;color:#b91c1c">삭제</button>
+      <button id="cancelListingBtn">취소</button>
+      <button class="save" id="saveListingBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="contractModal">
+  <div class="dialog">
+    <h3 id="contractModalTitle">계약완료 등록</h3>
+    <div class="formgrid">
+      <div><label>거래유형<select id="ctDeal"><option>매매</option><option>전세</option><option>월세</option></select></label></div>
+      <div><label>계약일<input id="ctDate" type="date"></label></div>
+      <div><label>고객명<input id="ctClient" placeholder="김주환"></label></div>
+      <div><label>전화번호<input id="ctPhone" placeholder="010-0000-0000"></label></div>
+      <div class="full"><label>물건 / 동·호수<input id="ctProperty" placeholder="더샵 201동 704호"></label></div>
+
+      <div class="full" id="salePriceWrap"><label>매매금액<input id="ctSalePrice" placeholder="예: 5억8천"></label></div>
+
+      <div id="depositWrap"><label>보증금<input id="ctDeposit" placeholder="예: 4억8천 / 5000"></label></div>
+      <div id="rentWrap"><label>월세<input id="ctRent" placeholder="예: 160"></label></div>
+
+      <div><label>잔금일 / 입주일<input id="ctMoveDate" type="date"></label></div>
+      <div><label>계약 만기일<input id="ctExpiry" type="date"></label></div>
+
+      <div class="full" id="ctExpiryAutoWrap">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#0f172a">
+          <input id="ctExpiryAuto" type="checkbox" checked style="width:auto;margin:0">
+          전세·월세 계약은 만기 6개월 전 관리대상으로 자동 등록
+        </label>
+        <div style="font-size:11px;color:#64748b;margin-top:5px">
+          계약 저장 → 고객관리 자동 연결 → 만기 6개월 전 오늘업무/만기관리 알림 생성
+        </div>
+      </div>
+
+      <div class="full"><label>중개보수<input id="ctFee" placeholder="예: 100만원"></label></div>
+      <div class="full"><label>특약 / 메모<textarea id="ctMemo" placeholder="계약 특이사항, 잔금 준비사항, 고객 요청사항"></textarea></label></div>
+    </div>
+    <div class="actions">
+      <button id="deleteContractBtn" style="display:none;margin-right:auto;color:#b91c1c">삭제</button>
+      <button id="cancelContractBtn">취소</button>
+      <button class="save" id="saveContractBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="customerModal">
+  <div class="dialog">
+    <h3 id="customerModalTitle">고객 등록</h3>
+    <div class="formgrid">
+      <div><label>고객명<input id="cName" placeholder="김주환"></label></div>
+      <div><label>전화번호<input id="cPhone" placeholder="010-0000-0000"></label></div>
+      <div><label>거래유형<select id="cDeal"><option>매매</option><option>전세</option><option>월세</option><option>기타</option></select></label></div>
+      <div><label>고객상태<select id="cStatus"><option>진행중</option><option>후속관리</option><option>대기</option><option>계약완료</option><option>종료</option></select></label></div>
+      <div class="full"><label>희망조건 / 핵심정보<textarea id="cCondition" rows="2" placeholder="예: 34A · 7~12층 · 중층 선호&#10;입주시기 10~12월 · 부부+아이 · 34평 전세 나오면 연락"></textarea></label></div>
+      <div><label>계약만기일<input id="cExpiry" type="date"></label></div>
+      <div><label>최초 6개월 알림<select id="cInitialNotify"><option value="both">나 + 고객</option><option value="me">나에게만</option><option value="none">사용 안 함</option></select></label></div>
+
+      <div class="full" id="customerContractFields" style="display:none;border:1px solid #fecdd3;background:#fff1f2;border-radius:12px;padding:12px">
+        <div style="font-weight:800;color:#9f1239;margin-bottom:8px">🌸 계약 진행 관리</div>
+        <div class="formgrid">
+          <div><label>계약금 입금액<input id="cDownPayment" placeholder="예: 500만원"></label></div>
+          <div><label>계약금 입금일<input id="cDownPaymentDate" type="date"></label></div>
+          <div><label>계약서 작성일<input id="cContractDate" type="date"></label></div>
+          <div><label>잔금일<input id="cBalanceDate" type="date"></label></div>
+          <div><label>잔금액<input id="cBalanceAmount" placeholder="예: 5억5천"></label></div>
+          <div><label>입주일<input id="cMoveInDate" type="date"></label></div>
+          <div class="full"><label>계약 물건 / 동·호수<input id="cContractProperty" placeholder="예: 더샵 309동 206호"></label></div>
+          <div class="full"><label>계약 진행 메모<textarea id="cContractMemo" placeholder="계약서 준비, 대출, 잔금 준비사항 등"></textarea></label></div>
+        </div>
+      </div>
+
+      <div class="full" id="customerEndFields" style="display:none;border:1px solid #cbd5e1;background:#f8fafc;border-radius:12px;padding:12px">
+        <div style="font-weight:800;color:#475569;margin-bottom:8px">📁 종료 고객 기록</div>
+        <div class="formgrid">
+          <div><label>종료일<input id="cEndDate" type="date"></label></div>
+          <div><label>종료사유<select id="cEndReason">
+            <option value="">선택</option>
+            <option>타부동산 계약</option>
+            <option>매수·임차 포기</option>
+            <option>연락두절</option>
+            <option>조건불일치</option>
+            <option>보류 후 종료</option>
+            <option>기타</option>
+          </select></label></div>
+          <div class="full"><label>종료 메모<textarea id="cEndMemo" placeholder="예: 주말에 다른 부동산에서 다른 집 계약"></textarea></label></div>
+        </div>
+      </div>
+      <div class="full" id="customerFollowFields" style="display:none;border:1px solid #bfdbfe;background:#f8fbff;border-radius:12px;padding:12px">
+        <div style="font-weight:900;color:#1d4ed8;margin-bottom:4px">🔁 후속관리</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:8px">다음 약속일과 시간을 입력하면 일정표에 자동으로 등록됩니다.</div>
+        <div class="formgrid">
+          <div><label>지난 안내 / 연락일<input id="cFollowLastDate" type="date"></label></div>
+          <div><label>다음 약속일<input id="cFollowNextDate" type="date"></label></div>
+          <div><label>다음 약속시간<input id="cFollowNextTime" type="time"></label></div>
+          <div class="full"><label>지난 안내내용<textarea id="cFollowLastNote" rows="2" placeholder="예: 8/8 더샵 34평 4개 안내"></textarea></label></div>
+          <div class="full"><label>고객 반응<textarea id="cFollowReaction" rows="2" placeholder="예: 중층 선호, 309동 관심"></textarea></label></div>
+          <div class="full"><label>다음 안내 / 해야 할 일<textarea id="cFollowNextTask" rows="2" placeholder="예: 토요일 재방문 · 새 매물 3개 추가 안내"></textarea></label></div>
+        </div>
+      </div>
+      <div class="full"><label>고객 메모<textarea id="cMemo" placeholder="상담내용, 입주시기, 특이사항"></textarea></label></div>
+    </div>
+    <div class="actions">
+      <button id="deleteCustomerBtn" style="display:none;margin-right:auto;color:#b91c1c">삭제</button>
+      <button id="cancelCustomerBtn">취소</button>
+      <button class="save" id="saveCustomerBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="followModal">
+  <div class="dialog">
+    <h3>후속 고객 진행기록</h3>
+    <div class="formgrid">
+      <div class="full"><label>고객<input id="fuCustomer" disabled></label></div>
+      <div><label>지난 안내 / 연락일<input id="fuCallDate" type="date"></label></div>
+      <div class="full"><label>지난 안내 / 통화내용<textarea id="fuNote" placeholder="예: 8/8 더샵 309동 등 4개 안내"></textarea></label></div>
+      <div class="full"><label>고객 반응<textarea id="fuReaction" placeholder="예: 중층 선호, 309동 관심, 주방 구조 마음에 듦"></textarea></label></div>
+      <div><label>다음 약속일<input id="fuNextDate" type="date"></label></div>
+      <div><label>다음 약속시간<input id="fuNextTime" type="time"></label></div>
+      <div class="full"><label>다음 안내 / 해야 할 일<textarea id="fuNextTask" placeholder="예: 토요일 재방문 · 새로 나온 34평 3개 추가 안내"></textarea></label></div>
+      <div class="full"><label>다음 알림 대상<select id="fuTarget">
+        <option value="none">알림 없음</option>
+        <option value="me">나에게만 알림</option>
+        <option value="both">나 + 고객에게 알림</option>
+      </select></label></div>
+    </div>
+    <div class="actions">
+      <button id="cancelFollowBtn">취소</button>
+      <button class="save" id="saveFollowBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="dialog">
+    <h3>업무 일정 등록</h3>
+    <div class="formgrid">
+      <div><label>날짜<input id="fDate" type="date"></label></div>
+      <div><label>시작시간<input id="fTime" type="time"></label></div>
+      <div><label>종료시간<input id="fEndTime" type="time"></label></div>
+      <div><label>업무종류<select id="fType">
+        <option>상담</option><option>안내</option><option>매물접수</option>
+        <option>재연락</option><option>계약</option><option>잔금·입주</option><option>기타</option>
+      </select></label></div>
+      <div><label>거래유형<select id="fDeal">
+        <option>매매</option><option>전세</option><option>월세</option><option>기타</option>
+      </select></label></div>
+      <div><label>처리상태<select id="fStatus"><option value="todo">예정</option><option value="done">완료</option><option value="hold">보류</option></select></label></div>
+      <div><label>다음 연락일<input id="fFollowDate" type="date"></label></div>
+      <div><label>고객명<input id="fClient"></label></div>
+      <div><label>고객 연락처<input id="fPhone" placeholder="010-0000-0000"></label></div>
+      <div class="full"><label>업무내용<input id="fTitle"></label></div>
+      <div id="listingQuickFields" class="full" style="display:none">
+        <div class="formgrid">
+          <div class="full"><label>매물명 / 동·호수<input id="fProperty" placeholder="제이티플라자 504호"></label></div>
+          <div><label>상태<select id="fListingStatus"><option>공실</option><option>거주중</option><option>입주협의</option><option>기타</option></select></label></div>
+          <div><label>소유자 연락처<input id="fOwnerPhone" placeholder="010-0000-0000"></label></div>
+          <div id="fSaleWrap"><label>매매가<input id="fSalePrice" placeholder="예: 5억8천"></label></div>
+          <div id="fDepositWrap"><label>보증금<input id="fDeposit" placeholder="예: 3000"></label></div>
+          <div id="fRentWrap"><label>월세<input id="fRent" placeholder="예: 120"></label></div>
+        </div>
+      </div>
+      <div class="full"><label>메모<textarea id="fMemo" placeholder="고객 조건, 약속 내용 등"></textarea></label></div>
+      <div class="full"><label>후기 / 결과<textarea id="fReview" placeholder="안내 후 고객 반응, 다음에 할 일, 재연락 필요사항"></textarea></label></div>
+    </div>
+    <div class="actions">
+      <button id="deleteBtn" style="display:none;margin-right:auto;color:#b91c1c">삭제</button>
+      <button id="cancelBtn">취소</button>
+      <button class="save" id="saveBtn">저장</button>
+    </div>
+  </div>
+</div>
 
 <script>
-window.events = JSON.parse(localStorage.getItem("pkplanner_v21_events")||"[]");
-window.customers = JSON.parse(localStorage.getItem("pkplanner_v21_customers")||"[]");
-window.listings = JSON.parse(localStorage.getItem("pkplanner_v21_listings")||"[]");
-window.contracts = JSON.parse(localStorage.getItem("pkplanner_v21_contracts")||"[]");
-window.cashEntries = JSON.parse(localStorage.getItem("pkplanner_v21_cash")||"[]");
-window.routines = JSON.parse(localStorage.getItem("pkplanner_v25_routines")||"[]");
-window.routineChecks = JSON.parse(localStorage.getItem("pkplanner_v25_routineChecks")||"{}");
-window.diaryEntries = JSON.parse(localStorage.getItem("pkplanner_v27_diary")||"{}");
+const colors={"상담":"#dbeafe","안내":"#dcfce7","매물접수":"#fef3c7","재연락":"#fee2e2","계약":"#ede9fe","잔금·입주":"#cffafe","기타":"#e5e7eb"};
+const dealColors={"매매":"#fef08a","전세":"#bbf7d0","월세":"#bae6fd","기타":"#e5e7eb"};
+const sample=[
+ {id:1,date:"2026-08-08",time:"14:30",type:"상담",deal:"매매",status:"done",followDate:"2026-08-15",client:"김주환",phone:"",title:"34A 중층 매수상담 + 현장안내",memo:"전세만기 26년12월"},
+ {id:2,date:"2026-08-08",time:"16:00",type:"안내",deal:"월세",status:"done",followDate:"",client:"월세손님",phone:"010-3829-2337",title:"201-704 월세 5000/160",memo:"큰평수 신규매물 나오면 연락"},
+ {id:3,date:"2026-08-08",time:"20:00",type:"안내",deal:"전세",status:"todo",followDate:"",client:"전세손님",phone:"",title:"전세 4억8천 안내",memo:""},
+ {id:4,date:"2026-08-15",time:"14:00",type:"안내",deal:"매매",status:"todo",followDate:"",client:"김주환",phone:"",title:"34A 매매 5세대 안내",memo:""}
+];
+let events=JSON.parse(localStorage.getItem("pkplanner_v21_events")||"null")||sample;
+function localTodayNoon(){const d=new Date();d.setHours(12,0,0,0);return d}
+let current=localTodayNoon(), view="day";
+const content=document.getElementById("content"), boardWrap=document.getElementById("boardWrap"), datePick=document.getElementById("datePick");
+const startHour=0,endHour=23,rowH=88,timeW=62;
 
-function saveAll() { if (window.syncToCloud) window.syncToCloud(); }
+function pad(n){return String(n).padStart(2,"0")}
+function fmt(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function mins(t){const [h,m]=t.split(":").map(Number);return h*60+m}
+function esc(s=""){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]))}
+function startOfWeek(d){let x=new Date(d);let k=(x.getDay()+6)%7;x.setDate(x.getDate()-k);x.setHours(12,0,0,0);return x}
+function save(){localStorage.setItem("pkplanner_v21_events",JSON.stringify(events))}
+function getDates(){
+  if(view==="day") return [new Date(current)];
+  if(view==="week"){let s=startOfWeek(current);return [...Array(7)].map((_,i)=>{let d=new Date(s);d.setDate(d.getDate()+i);return d})}
+  if(view==="month"){
+    let y=current.getFullYear(),m=current.getMonth(),last=new Date(y,m+1,0).getDate();
+    return [...Array(last)].map((_,i)=>new Date(y,m,i+1,12));
+  }
+  let y=current.getFullYear(),arr=[];
+  for(let m=0;m<12;m++){let last=new Date(y,m+1,0).getDate();for(let d=1;d<=last;d++)arr.push(new Date(y,m,d,12))}
+  return arr;
+}
+function colWidth(){
+  const z=Number(document.getElementById("zoomSel").value);
+  if(view==="day") return Math.max(320,z*4);
+  if(view==="week") return Math.max(120,z*1.8);
+  if(view==="month") return Math.max(42,z*.72);
+  return Math.max(30,z*.55);
+}
+function eventPhoneKey(v=""){return String(v||"").replace(/[^0-9]/g,"")}
+function usableClientName(v=""){
+  const s=String(v||"").trim();
+  if(!s || ["고객","손님","문의","미정","-"].includes(s)) return "";
+  return s;
+}
+function isInternalWorkEvent(e){
+  const text=`${e.type||""} ${e.title||""} ${e.memo||""}`;
+  if(e.type==="기타" || e.type==="매물접수" || e.type==="잔금·입주") return true;
+  return /(공실\s*촬영|촬영|견적|정리|광고|블로그|유튜브|숏츠|업무)/i.test(text) && !usableClientName(e.client);
+}
+function normalizePersonText(v=""){
+  return String(v||"")
+    .replace(/[()\[\]{}·,&/]/g," ")
+    .replace(/\s+/g," ")
+    .trim()
+    .toLowerCase();
+}
+function personTokens(v=""){
+  return normalizePersonText(v)
+    .split(" ")
+    .filter(x=>x.length>=2 && !["고객","손님","부부","아기","거주","근무","매매","전세","월세"].includes(x));
+}
+function isCompletedContractEvent(e){
+  // 공실촬영·견적·광고 등 내부업무는 계약색 적용 금지
+  if(isInternalWorkEvent(e)) return false;
 
-document.querySelectorAll(".nav button[data-section]").forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll(".nav button[data-section]").forEach(b => b.classList.remove("active"));
+  // 일정 자체를 '계약'으로 바꾸면 즉시 핑크
+  if(e.type==="계약") return true;
+
+  const ep=eventPhoneKey(e.phone);
+  const eventText=normalizePersonText(`${e.client||""} ${e.title||""} ${e.memo||""}`);
+
+  const samePerson=c=>{
+    const cp=eventPhoneKey(c.phone);
+    if(ep && cp && ep===cp) return true; // 전화번호가 가장 정확
+
+    const cname=normalizePersonText(c.name||c.client||"");
+    if(cname && eventText && (eventText.includes(cname) || cname.includes(eventText))) return true;
+
+    // 이름에 괄호/설명이 붙어 있어도 핵심 단어가 일정에 있으면 연결
+    const toks=personTokens(c.name||c.client||"");
+    return toks.some(tok=>eventText.includes(tok));
+  };
+
+  if(typeof customers!=="undefined" && Array.isArray(customers)){
+    if(customers.some(c=>c.status==="계약완료" && samePerson(c))) return true;
+  }
+  if(typeof contracts!=="undefined" && Array.isArray(contracts)){
+    if(contracts.some(c=>samePerson(c))) return true;
+  }
+  return false;
+}
+
+function viewRangeLabel(dates){
+  if(!dates.length) return "";
+  if(view==="day") return `${fmt(dates[0])} 하루`;
+  if(view==="week") return `${fmt(dates[0])} ~ ${fmt(dates[dates.length-1])}`;
+  if(view==="month") return `${current.getFullYear()}년 ${current.getMonth()+1}월`;
+  return `${current.getFullYear()}년`;
+}
+function renderScheduleSummary(dates){
+  const box=document.getElementById("scheduleSummary");
+  if(!box) return;
+  const dsSet=new Set(dates.map(fmt));
+  const list=events.filter(e=>dsSet.has(e.date));
+  const customerWork=list.filter(e=>["상담","안내","재연락","계약"].includes(e.type)).length;
+  const contractLinked=list.filter(isCompletedContractEvent).length;
+  const counts={매매:0,전세:0,월세:0,기타:0};
+  list.forEach(e=>{const d=counts[e.deal]!==undefined?e.deal:"기타";counts[d]++});
+  box.innerHTML=`
+    <div class="schedule-summary-card"><div class="n">${list.length}</div><div class="l">${viewRangeLabel(dates)} · 전체 일정</div></div>
+    <div class="schedule-summary-card"><div class="n">${customerWork}</div><div class="l">고객 상담·안내·연락</div></div>
+    <div class="schedule-summary-card contract"><div class="n">${contractLinked}</div><div class="l">계약·계약완료 연결 일정</div></div>
+    <div class="schedule-summary-card"><div class="n">${counts.매매}</div><div class="l">매매 일정</div></div>
+    <div class="schedule-summary-card"><div class="n">${counts.전세}</div><div class="l">전세 일정</div></div>
+    <div class="schedule-summary-card"><div class="n">${counts.월세}</div><div class="l">월세 일정 · 기타 ${counts.기타}</div></div>`;
+}
+function renderYearOverview(){
+  const y=current.getFullYear();
+  const allYear=events.filter(e=>String(e.date||"").startsWith(`${y}-`));
+  let h=`<div class="year-overview">`;
+  for(let m=0;m<12;m++){
+    const prefix=`${y}-${pad(m+1)}-`;
+    const list=allYear.filter(e=>String(e.date||"").startsWith(prefix))
+      .slice().sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time)));
+    const contractCount=list.filter(isCompletedContractEvent).length;
+    const shown=list.slice(0,5);
+    h+=`<div class="year-month-card" onclick="openYearMonth(${m})">
+      <div class="ym-title"><span>${m+1}월</span><span>${list.length}건</span></div>
+      <div class="ym-counts"><span>계약연결 ${contractCount}</span><span>매매 ${list.filter(e=>e.deal==="매매").length}</span><span>전세 ${list.filter(e=>e.deal==="전세").length}</span><span>월세 ${list.filter(e=>e.deal==="월세").length}</span></div>
+      ${shown.length?shown.map(e=>`<div class="ym-event ${isCompletedContractEvent(e)?"contract":""}">${esc(String(Number(e.date.slice(8)))+"일 "+(e.time||"")+" "+((e.client&&e.client!=="고객")?e.client:(e.title||e.type)))}</div>`).join(""):`<div class="year-empty">등록 일정 없음</div>`}
+      ${list.length>5?`<div class="year-empty">+ ${list.length-5}건 더 있음 · 클릭하면 한달 보기</div>`:""}
+    </div>`;
+  }
+  h+=`</div>`;
+  content.innerHTML=h;
+  boardWrap.scrollTop=0;
+  boardWrap.scrollLeft=0;
+}
+window.openYearMonth=(m)=>{
+  current=new Date(current.getFullYear(),m,1,12);
+  view="month";
+  document.getElementById("zoomSel").value="70";
+  render();
+};
+
+function headLabel(d){
+  if(view==="year") return `${d.getMonth()+1}/${d.getDate()}`;
+  return `${d.getMonth()+1}/${d.getDate()}<br><span style="font-size:10px;color:#64748b">${["일","월","화","수","목","금","토"][d.getDay()]}</span>`;
+}
+function render(){
+  datePick.value=fmt(current);
+  document.querySelectorAll(".viewtabs button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  const dates=getDates();
+  renderScheduleSummary(dates);
+  if(view==="year"){
+    renderYearOverview();
+    return;
+  }
+  const cw=colWidth(), cols=dates.length;
+  const totalW=timeW+cw*cols;
+  const bodyH=(endHour-startHour+1)*rowH;
+  let html=`<div class="board" style="--colw:${cw}px;width:${totalW}px;min-height:${bodyH+46}px">`;
+  html+=`<div class="header-row" style="grid-template-columns:${timeW}px repeat(${cols},${cw}px);height:46px">
+    <div class="corner">시간</div>`;
+  const today=fmt(localTodayNoon());
+  dates.forEach(d=>html+=`<div class="day-head ${fmt(d)===today?'today':''}"><div class="d">${headLabel(d)}</div></div>`);
+  html+=`</div>`;
+  html+=`<div class="body-grid" style="grid-template-columns:${timeW}px repeat(${cols},${cw}px)">`;
+  for(let h=startHour;h<=endHour;h++){
+    html+=`<div class="time-label" style="height:${rowH}px;position:relative">
+      <div>${pad(h)}:00</div>
+      <div style="position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;color:#94a3b8">${pad(h)}:30</div>
+    </div>`;
+    dates.forEach(d=>{
+      html+=`<div class="slot ${[0,6].includes(d.getDay())?'weekend':''}" style="height:${rowH}px"></div>`;
+    });
+  }
+  html+=`</div>`;
+  // month divider lines in year view
+  if(view==="year"){
+    dates.forEach((d,i)=>{
+      if(d.getDate()===1){
+        const left=timeW+i*cw;
+        html+=`<div class="month-marker" style="left:${left}px;top:46px"></div>
+        <div class="month-tag" style="left:${left+3}px;top:49px">${d.getMonth()+1}월</div>`;
+      }
+    });
+  }
+  // events
+  dates.forEach((d,i)=>{
+    const ds=fmt(d);
+    const evs=events.filter(e=>e.date===ds).slice().sort((a,b)=>mins(a.time)-mins(b.time));
+    evs.forEach((e,j)=>{
+      const startMin=mins(e.time);
+      const top=46+((startMin-startHour*60)/60)*rowH;
+      if(top<46 || top>46+bodyH) return;
+      const left=timeW+i*cw+2;
+      const width=Math.max(28,cw-4);
+
+      const durationMin=(e.endTime && mins(e.endTime)>startMin) ? mins(e.endTime)-startMin : 0;
+      const durationHeight=durationMin ? (durationMin/60)*rowH : 0;
+
+      // 종료시간이 입력된 일정은 '실제 예약시간'만큼만 높이를 사용한다.
+      // 예: 14:30~14:40 = 10분 높이, 15:00~15:30 = 30분 높이.
+      // 너무 짧아 클릭하기 어려운 경우에만 최소 높이를 적용한다.
+      const minReadableHeight=view==="year"?16:(view==="month"?18:20);
+      const noEndDefaultHeight=view==="year"?34:(view==="month"?42:52);
+      if(e.autoFromCustomer && !String(e.title||"").startsWith("↻ ")){
+        e.title="↻ "+(e.title||"후속 안내 / 연락");
+      }
+
+      const preferredHeight=durationMin
+        ? Math.max(minReadableHeight,durationHeight)
+        : noEndDefaultHeight;
+
+      // 다음 일정 시작선을 절대 침범하지 않도록 마지막 안전장치
+      const next=e[j+1];
+      const nextGapMin=next ? Math.max(0,mins(next.time)-startMin) : null;
+      const maxBeforeNext=nextGapMin!==null
+        ? Math.max(14,(nextGapMin/60)*rowH-4)
+        : preferredHeight;
+      const height=next ? Math.min(preferredHeight,maxBeforeNext) : preferredHeight;
+      const sizeClass=height<28?"tiny":(height<48?"compact":"");
+
+      const timeRange=e.endTime ? `${e.time}~${e.endTime}` : e.time;
+      const displayName=(e.client && e.client!=="고객") ? e.client : (e.title||e.type);
+      const title=view==="year"
+        ? `${timeRange} ${e.type}`
+        : `${timeRange} ${displayName}`;
+      const desc=view==="year" ? `${e.deal||"기타"} · ${e.client} · ${e.title}` : `${e.deal||"기타"} · ${e.type} · ${e.title}`;
+      const phone=e.phone ? `☎ ${e.phone}` : "☎ -";
+      const memo=e.memo ? `메모: ${e.memo}` : "메모: -";
+      const review=e.review ? `후기: ${e.review}` : "후기: -";
+      const completedContract=isCompletedContractEvent(e);
+      const eventBg=completedContract ? "#ec2f69" : (dealColors[e.deal||"기타"]||"#e5e7eb");
+      html+=`<div class="event ${completedContract?"contract-completed-event":""} ${view==="year"?"year-card":""} ${sizeClass}" data-id="${e.id}" onclick="editEvent(${e.id})" title="클릭해서 수정 · ${esc(e.client)} | ${esc(e.phone||"")} | ${esc(e.title)} | 메모: ${esc(e.memo||"")} | 후기: ${esc(e.review||"")}"
+        style="top:${top}px;left:${left}px;width:${width}px;height:${height}px;background:${eventBg}">
+        <strong>${esc(title)}</strong>
+        <div class="meta">${esc(desc)}</div>
+        <div class="phone-line">${esc(phone)}</div>
+        <div class="memo-line">${esc(memo)}</div>
+        <div class="review-line">${esc(review)}</div>
+      </div>`;
+    });
+  });
+  html+=`</div>`;
+  content.innerHTML=html;
+}
+document.querySelectorAll(".viewtabs button").forEach(b=>b.onclick=()=>{
+  view=b.dataset.view;
+  if(view==="year" && Number(document.getElementById("zoomSel").value)>52) document.getElementById("zoomSel").value="38";
+  if(view==="month" && Number(document.getElementById("zoomSel").value)<52) document.getElementById("zoomSel").value="70";
+  render(); boardWrap.scrollLeft=0;
+});
+
+document.getElementById("fType").addEventListener("change",()=>{
+  const type=document.getElementById("fType").value;
+  if(type==="기타") document.getElementById("fDeal").value="기타";
+});
+
+document.getElementById("zoomSel").onchange=render;
+document.getElementById("todayBtn").onclick=()=>{current=localTodayNoon();render()};
+document.getElementById("prevBtn").onclick=()=>{
+  if(view==="day")current.setDate(current.getDate()-1);
+  else if(view==="week")current.setDate(current.getDate()-7);
+  else if(view==="month")current.setMonth(current.getMonth()-1);
+  else current.setFullYear(current.getFullYear()-1);
+  render();
+};
+document.getElementById("nextBtn").onclick=()=>{
+  if(view==="day")current.setDate(current.getDate()+1);
+  else if(view==="week")current.setDate(current.getDate()+7);
+  else if(view==="month")current.setMonth(current.getMonth()+1);
+  else current.setFullYear(current.getFullYear()+1);
+  render();
+};
+datePick.onchange=()=>{current=new Date(datePick.value+"T12:00:00");render()};
+const modal=document.getElementById("modal");
+let editingId=null;
+
+function clearForm(){
+  document.getElementById("fDate").value=fmt(current);
+  document.getElementById("fTime").value="09:00";
+  document.getElementById("fEndTime").value="10:00";
+  document.getElementById("fType").value="상담";
+  document.getElementById("fDeal").value="매매";
+  if(document.getElementById("fStatus"))document.getElementById("fStatus").value="todo";
+  if(document.getElementById("fFollowDate"))document.getElementById("fFollowDate").value="";
+  document.getElementById("fClient").value="";
+  if(document.getElementById("fPhone"))document.getElementById("fPhone").value="";
+  document.getElementById("fTitle").value="";
+  document.getElementById("fMemo").value="";
+  document.getElementById("fReview").value="";
+  ["fProperty","fOwnerPhone","fSalePrice","fDeposit","fRent"].forEach(id=>{const el=document.getElementById(id); if(el)el.value=""});
+  if(document.getElementById("fListingStatus"))document.getElementById("fListingStatus").value="공실";
+  if(typeof syncScheduleListingFields==="function")syncScheduleListingFields();
+}
+
+document.getElementById("addBtn").onclick=()=>{
+  editingId=null; clearForm();
+  document.querySelector(".dialog h3").textContent="업무 일정 등록";
+  document.getElementById("deleteBtn").style.display="none";
+  if(typeof syncScheduleListingFields==="function")syncScheduleListingFields();
+  modal.classList.add("show");
+};
+
+window.editEvent=(id)=>{
+  const e=events.find(x=>x.id===id); if(!e)return;
+  editingId=id;
+  document.querySelector(".dialog h3").textContent="업무 일정 수정";
+  document.getElementById("fDate").value=e.date;
+  document.getElementById("fTime").value=e.time;
+  document.getElementById("fEndTime").value=e.endTime||"";
+  document.getElementById("fType").value=e.type;
+  document.getElementById("fDeal").value=e.deal||"기타";
+  if(document.getElementById("fStatus"))document.getElementById("fStatus").value=e.status||"todo";
+  if(document.getElementById("fFollowDate"))document.getElementById("fFollowDate").value=e.followDate||"";
+  document.getElementById("fClient").value=e.client||"";
+  if(document.getElementById("fPhone"))document.getElementById("fPhone").value=e.phone||"";
+  document.getElementById("fTitle").value=e.title||"";
+  document.getElementById("fMemo").value=e.memo||"";
+  document.getElementById("fReview").value=e.review||"";
+  if(document.getElementById("fProperty"))document.getElementById("fProperty").value=e.property||"";
+  if(document.getElementById("fOwnerPhone"))document.getElementById("fOwnerPhone").value=e.ownerPhone||"";
+  if(document.getElementById("fListingStatus"))document.getElementById("fListingStatus").value=e.listingStatus||"공실";
+  if(document.getElementById("fSalePrice"))document.getElementById("fSalePrice").value=e.salePrice||"";
+  if(document.getElementById("fDeposit"))document.getElementById("fDeposit").value=e.deposit||"";
+  if(document.getElementById("fRent"))document.getElementById("fRent").value=e.rent||"";
+  if(typeof syncScheduleListingFields==="function")syncScheduleListingFields();
+  document.getElementById("deleteBtn").style.display="block";
+  modal.classList.add("show");
+};
+
+document.getElementById("cancelBtn").onclick=()=>modal.classList.remove("show");
+
+document.getElementById("saveBtn").onclick=()=>{
+  const obj={
+    id:editingId||Date.now(),
+    date:document.getElementById("fDate").value,
+    time:document.getElementById("fTime").value,
+    endTime:document.getElementById("fEndTime").value,
+    type:document.getElementById("fType").value,
+    deal:document.getElementById("fDeal").value,
+    status:document.getElementById("fStatus")?document.getElementById("fStatus").value:"todo",
+    followDate:document.getElementById("fFollowDate")?document.getElementById("fFollowDate").value:"",
+    client:document.getElementById("fClient").value||"",
+    phone:document.getElementById("fPhone")?document.getElementById("fPhone").value:"",
+    title:document.getElementById("fTitle").value||"업무",
+    memo:document.getElementById("fMemo").value,
+    review:document.getElementById("fReview").value,
+    property:document.getElementById("fProperty")?document.getElementById("fProperty").value:"",
+    listingStatus:document.getElementById("fListingStatus")?document.getElementById("fListingStatus").value:"",
+    ownerPhone:document.getElementById("fOwnerPhone")?document.getElementById("fOwnerPhone").value:"",
+    salePrice:document.getElementById("fSalePrice")?document.getElementById("fSalePrice").value:"",
+    deposit:document.getElementById("fDeposit")?document.getElementById("fDeposit").value:"",
+    rent:document.getElementById("fRent")?document.getElementById("fRent").value:""
+  };
+  if(editingId){
+    const i=events.findIndex(x=>x.id===editingId);
+    if(i>=0)events[i]=obj;
+  }else{
+    events.push(obj);
+  }
+
+  // '매물접수' 일정은 접수매물 방에도 자동 등록/갱신
+  if(obj.type==="매물접수" && obj.property){
+    let linked=listings.find(x=>x.sourceEventId===obj.id);
+    const lobj={
+      id:linked?linked.id:Date.now()+1,
+      sourceEventId:obj.id,
+      deal:obj.deal||"기타",
+      date:obj.date,
+      property:obj.property,
+      status:obj.listingStatus||"공실",
+      owner:obj.client||"주인",
+      phone:obj.ownerPhone||"",
+      salePrice:obj.salePrice||"",
+      deposit:obj.deposit||"",
+      rent:obj.rent||"",
+      memo:obj.memo||""
+    };
+    if(linked){
+      const li=listings.findIndex(x=>x.id===linked.id); if(li>=0)listings[li]=lobj;
+    }else listings.push(lobj);
+    saveListings();
+  }
+
+  save(); modal.classList.remove("show"); render();
+  if(typeof renderListings==="function")renderListings();
+  if(typeof syncScheduleCustomers==="function"){
+    syncScheduleCustomers();
+    if(typeof renderCustomers==="function")renderCustomers();
+    if(typeof renderFollowup==="function")renderFollowup();
+  }
+};
+
+document.getElementById("deleteBtn").onclick=()=>{
+  if(editingId && confirm("이 업무 기록을 삭제할까요?")){
+    events=events.filter(x=>x.id!==editingId);
+    save(); modal.classList.remove("show"); render();
+  }
+};
+
+// ===== 고객 / 만기 / 후속관리 =====
+let customers = JSON.parse(localStorage.getItem("pkplanner_v21_customers")||"null") || [
+  {id:101,name:"김주환",phone:"010-0000-0000",deal:"매매",status:"진행중",condition:"34A · 7~12층 · 중층 선호",expiry:"2026-12-31",initialNotify:"both",memo:"전세만기 후 매수 검토",followups:[
+    {callDate:"2026-08-08",note:"브리핑 및 현장안내 완료. 8/15 재안내 예정",nextDate:"2026-08-15",target:"me"}
+  ]},
+  {id:102,name:"월세손님",phone:"010-3829-2337",deal:"월세",status:"대기",condition:"큰평수 선호",expiry:"",initialNotify:"both",memo:"마음에 드는 집이면 입주일 조정 가능",followups:[
+    {callDate:"2026-08-08",note:"201-704 안내 완료. 큰평수 신규매물 나오면 연락",nextDate:"",target:"none"}
+  ]}
+];
+function saveCustomers(){localStorage.setItem("pkplanner_v21_customers",JSON.stringify(customers))}
+function syncCustomerFollowSchedule(c){
+  // 이 고객의 후속관리에서 자동 생성한 일정만 찾는다.
+  const linked = events.filter(e=>String(e.sourceCustomerFollowId||"")===String(c.id));
+
+  // 후속관리가 아니거나 날짜/시간이 없으면 자동일정 제거
+  if(c.status!=="후속관리" || !c.followNextDate || !c.followupNextTime){
+    if(linked.length){
+      events = events.filter(e=>String(e.sourceCustomerFollowId||"")!==String(c.id));
+      save();
+    }
+    return;
+  }
+
+  const title = c.followupNextTask || c.condition || "후속 안내 / 연락";
+  const memoParts = [];
+  if(c.followLastNote) memoParts.push("지난 안내: "+c.followLastNote);
+  if(c.followupReaction) memoParts.push("고객 반응: "+c.followupReaction);
+
+  const scheduleObj = {
+    id: linked[0]?.id || (Date.now()+Math.floor(Math.random()*100000)),
+    date: c.followNextDate,
+    time: c.followupNextTime,
+    endTime: "",
+    type: "안내",
+    deal: c.deal || "기타",
+    status: "todo",
+    followDate: "",
+    client: c.name || "고객",
+    phone: c.phone || "",
+    title,
+    memo: memoParts.join(" / "),
+    review: "",
+    sourceCustomerFollowId: c.id,
+    autoFromCustomer: true
+  };
+
+  if(linked.length){
+    const idx=events.findIndex(e=>e.id===linked[0].id);
+    if(idx>=0) events[idx]=scheduleObj;
+    // 중복 자동일정이 혹시 생겼다면 첫 일정만 남긴다.
+    const keepId=scheduleObj.id;
+    events=events.filter(e=>String(e.sourceCustomerFollowId||"")!==String(c.id) || e.id===keepId);
+  }else{
+    events.push(scheduleObj);
+  }
+  save();
+}
+
+function removeCustomerFollowSchedule(customerId){
+  const before=events.length;
+  events=events.filter(e=>String(e.sourceCustomerFollowId||"")!==String(customerId));
+  if(events.length!==before) save();
+}
+
+function normalizePhone(v){return String(v||"").replace(/\D/g,"")}
+
+// 일정의 상담/안내/재연락 고객을 고객관리와 자동 연결
+function syncScheduleCustomers(){
+  let changed=false;
+  const eligibleTypes=new Set(["상담","안내","재연락"]);
+  events.forEach(e=>{
+    const name=String(e.client||"").trim();
+    if(!name || name==="고객" || !eligibleTypes.has(e.type)) return;
+
+    const phone=String(e.phone||"").trim();
+    const phoneKey=normalizePhone(phone);
+
+    // 전화번호가 있으면 전화번호 우선, 없으면 고객명으로 중복 방지
+    let c=null;
+    if(phoneKey){
+      c=customers.find(x=>normalizePhone(x.phone)===phoneKey);
+    }
+    if(!c){
+      c=customers.find(x=>String(x.name||"").trim()===name);
+    }
+
+    if(!c){
+      customers.push({
+        id:Date.now()+Math.floor(Math.random()*100000),
+        name,
+        phone,
+        deal:e.deal||"기타",
+        status:"진행중",
+        condition:e.title||"",
+        expiry:"",
+        initialNotify:"both",
+        memo:e.memo||"",
+        followups:[],
+        sourceSchedule:true,
+        lastScheduleDate:e.date||"",
+        createdAt:Date.now(),
+        createdDate:fmt(new Date())
+      });
+      changed=true;
+    }else{
+      // 기존 고객 정보는 지우지 않고, 비어 있는 항목만 일정 정보로 보완
+      if(!c.phone && phone){c.phone=phone;changed=true}
+      if((!c.deal || c.deal==="기타") && e.deal){c.deal=e.deal;changed=true}
+      if(!c.condition && e.title){c.condition=e.title;changed=true}
+      if(!c.memo && e.memo){c.memo=e.memo;changed=true}
+      if(!c.lastScheduleDate || (e.date && e.date>c.lastScheduleDate)){
+        c.lastScheduleDate=e.date||c.lastScheduleDate||"";
+        changed=true;
+      }
+    }
+  });
+  if(changed) saveCustomers();
+}
+
+function addMonths(dateStr,delta){
+  if(!dateStr)return "";
+  const [y,m,d]=dateStr.split("-").map(Number);
+  const x=new Date(y,m-1,d,12);
+  const originalDay=x.getDate();
+  x.setMonth(x.getMonth()+delta);
+  if(x.getDate()!==originalDay) x.setDate(0);
+  return fmt(x);
+}
+function notifyLabel(v){return v==="both"?"나 + 고객":v==="me"?"나에게만":"알림 없음"}
+function dealBadge(deal){
+  const cls=deal==="매매"?"sale":deal==="전세"?"jeonse":deal==="월세"?"monthly":"etc";
+  return `<span class="badge ${cls}">${esc(deal||"기타")}</span>`;
+}
+function latestFollow(c){
+  const arr=c.followups||[];
+  return arr.length?arr[arr.length-1]:null;
+}
+let customerViewFilter="all";
+
+function setCustomerViewFilter(filter){
+  customerViewFilter=filter;
+  renderCustomers();
+}
+
+function ensureCustomerCreatedMeta(){
+  let changed=false;
+  customers.forEach((c,idx)=>{
+    if(!c.createdAt){
+      let base=0;
+      if(c.lastScheduleDate){
+        const t=Date.parse(c.lastScheduleDate+"T12:00:00");
+        if(!Number.isNaN(t)) base=t;
+      }
+      const f=latestFollow(c);
+      if(!base && f && f.callDate){
+        const t=Date.parse(f.callDate+"T12:00:00");
+        if(!Number.isNaN(t)) base=t;
+      }
+      if(!base) base=Date.now()-(customers.length-idx)*1000;
+      c.createdAt=base;
+      if(!c.createdDate) c.createdDate=fmt(new Date(base));
+      changed=true;
+    }else if(!c.createdDate){
+      c.createdDate=fmt(new Date(Number(c.createdAt)));
+      changed=true;
+    }
+  });
+  if(changed) saveCustomers();
+}
+ensureCustomerCreatedMeta();
+
+function renderCustomers(){
+  const active=customers.filter(c=>c.status==="진행중"||c.status==="후속관리"||c.status==="대기").length;
+  const contractDone=customers.filter(c=>c.status==="계약완료").length;
+  const lost=customers.filter(c=>c.status==="종료" && c.endReason==="타부동산 계약").length;
+  const endedOther=customers.filter(c=>c.status==="종료" && c.endReason!=="타부동산 계약").length;
+
+  document.getElementById("customerSummary").innerHTML=`
+    <div class="crm-card customer-summary-click ${customerViewFilter==="all"?"selected":""}" onclick="setCustomerViewFilter('all')">
+      <div class="big">${customers.length}</div><div class="small">전체 고객</div>
+    </div>
+    <div class="crm-card customer-summary-click ${customerViewFilter==="active"?"selected":""}" style="background:#eff6ff" onclick="setCustomerViewFilter('active')">
+      <div class="big" style="color:#1d4ed8">${active}</div><div class="small">진행중 / 대기</div>
+    </div>
+    <div class="crm-card customer-summary-click ${customerViewFilter==="contract"?"selected":""}" style="background:#ffd9e2" onclick="setCustomerViewFilter('contract')">
+      <div class="big" style="color:#e11d48">${contractDone}</div><div class="small" style="color:#9f1239;font-weight:800">계약완료</div>
+    </div>
+    <div class="crm-card customer-summary-click ${customerViewFilter==="lost"?"selected":""}" style="background:#f8fafc" onclick="setCustomerViewFilter('lost')">
+      <div class="big" style="color:#94a3b8">${lost}</div><div class="small" style="color:#94a3b8">타부동산 계약</div>
+    </div>`;
+
+  // 상태 안내 pill도 클릭 가능하게 동작
+  const legend = document.querySelector("#customers .customer-status-legend");
+  if(legend){
+    legend.querySelectorAll("[data-customer-view]").forEach(el=>{
+      el.style.cursor="pointer";
+      el.style.outline = el.dataset.customerView===customerViewFilter ? "2px solid #0f172a" : "none";
+    });
+  }
+
+  const rank=c=>{
+    if(c.status==="진행중"||c.status==="후속관리"||c.status==="대기") return 1;
+    if(c.status==="계약완료") return 2;
+    if(c.status==="종료" && c.endReason==="타부동산 계약") return 3;
+    return 4;
+  };
+
+  let list=customers.slice();
+  if(customerViewFilter==="active"){
+    list=list.filter(c=>c.status==="진행중"||c.status==="후속관리"||c.status==="대기");
+  }else if(customerViewFilter==="contract"){
+    list=list.filter(c=>c.status==="계약완료");
+  }else if(customerViewFilter==="lost"){
+    list=list.filter(c=>c.status==="종료" && c.endReason==="타부동산 계약");
+  }else if(customerViewFilter==="ended"){
+    list=list.filter(c=>c.status==="종료" && c.endReason!=="타부동산 계약");
+  }
+
+  // 기본 정렬: 최근 등록한 고객이 항상 위로.
+  // createdAt이 없는 기존 고객은 등록일/최근일정/최근통화 정보를 보조값으로 사용.
+  const customerSortValue=c=>{
+    if(c.createdAt) return Number(c.createdAt);
+    if(c.createdDate){
+      const t=Date.parse(c.createdDate+"T12:00:00");
+      if(!Number.isNaN(t)) return t;
+    }
+    if(c.lastScheduleDate){
+      const t=Date.parse(c.lastScheduleDate+"T12:00:00");
+      if(!Number.isNaN(t)) return t;
+    }
+    const f=latestFollow(c);
+    if(f&&f.callDate){
+      const t=Date.parse(f.callDate+"T12:00:00");
+      if(!Number.isNaN(t)) return t;
+    }
+    return 0;
+  };
+  list.sort((a,b)=>customerSortValue(b)-customerSortValue(a));
+
+  let h=`<div class="table-wrap"><table class="crm-table"><thead><tr>
+    <th>등록일</th><th>고객</th><th>상태</th><th>거래</th><th>핵심조건</th><th>전화</th><th>지난 안내 / 고객반응</th><th>다음 약속 / 할 일</th><th>계약/종료 정보</th><th>관리</th>
+  </tr></thead><tbody>`;
+
+  if(!list.length){
+    h+=`<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:25px">해당 고객이 없습니다.</td></tr>`;
+  }
+
+  list.forEach(c=>{
+    const f=latestFollow(c);
+    const isContractDone=c.status==="계약완료";
+    const isEnded=c.status==="종료";
+    const isLost=isEnded && c.endReason==="타부동산 계약";
+
+    let info="-";
+    if(isContractDone){
+      info=`<div class="contract-progress">
+        ${c.downPayment?`<b>계약금</b> ${esc(c.downPayment)}${c.downPaymentDate?` · ${esc(c.downPaymentDate)}`:""}<br>`:""}
+        ${c.contractDate?`<b>계약서</b> ${esc(c.contractDate)}<br>`:""}
+        ${c.balanceDate?`<b>잔금</b> ${esc(c.balanceDate)}${c.balanceAmount?` · ${esc(c.balanceAmount)}`:""}<br>`:""}
+        ${c.moveInDate?`<b>입주</b> ${esc(c.moveInDate)}<br>`:""}
+        ${c.contractProperty?`${esc(c.contractProperty)}`:""}
+        ${(!c.downPayment&&!c.contractDate&&!c.balanceDate&&!c.moveInDate&&!c.contractProperty)?"계약 진행정보 미입력":""}
+      </div>`;
+    } else if(isEnded){
+      info=`<div class="end-info">
+        <b>${isLost?"타부동산 계약":"종료"}</b>${c.endDate?` · ${esc(c.endDate)}`:""}<br>
+        ${c.endReason?`사유: ${esc(c.endReason)}`:"종료사유 미입력"}
+        ${c.endMemo?`<br>${esc(c.endMemo)}`:""}
+      </div>`;
+    }
+
+    const rowClass=isContractDone?"contract-done":(isLost?"customer-lost":(isEnded?"customer-ended":""));
+    let statusBadge="";
+    if(c.status==="후속관리"){
+      statusBadge=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:#ede9fe;color:#6d28d9;font-weight:900">후속관리</span>`;
+    }else if(c.status==="진행중"||c.status==="대기"){
+      statusBadge=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:#dbeafe;color:#1d4ed8;font-weight:800">${esc(c.status)}</span>`;
+    }else if(isContractDone){
+      statusBadge=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:#fecdd3;color:#be123c;font-weight:900">계약완료</span>`;
+    }else if(isLost){
+      statusBadge=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:#f1f5f9;color:#64748b;font-weight:700">타부동산 계약</span>`;
+    }else{
+      statusBadge=`<span style="display:inline-block;padding:3px 8px;border-radius:999px;background:#e2e8f0;color:#64748b;font-weight:800">종료</span>`;
+    }
+
+    const regDate=c.createdDate || (c.createdAt?fmt(new Date(Number(c.createdAt))):(c.lastScheduleDate||"-"));
+    h+=`<tr class="${rowClass}">
+      <td style="white-space:nowrap"><b>${esc(regDate)}</b></td>
+      <td><b>${esc(c.name)}</b></td>
+      <td>${statusBadge}</td>
+      <td>${dealBadge(c.deal)}</td>
+      <td><div class="crm-condition" title="${esc(c.condition||"-")}">${esc(c.condition||"-")}</div></td>
+      <td style="white-space:nowrap">${esc(c.phone||"-")}</td>
+      <td>
+        <div style="white-space:normal;line-height:1.45">
+          ${c.followLastDate?`<b>${esc(c.followLastDate)}</b><br>`:""}
+          ${esc(c.followLastNote || (f?f.note:"-"))}
+          ${c.followupReaction?`<br><span style="color:#6d28d9"><b>반응:</b> ${esc(c.followupReaction)}</span>`:""}
+        </div>
+      </td>
+      <td>
+        ${(!isEnded && (c.status==="후속관리" || c.followNeeded)) ? `
+          <div style="white-space:normal;line-height:1.45">
+            ${c.followNextDate?`<b>${esc(c.followNextDate)}${c.followupNextTime?` ${esc(c.followupNextTime)}`:""}</b><br>`:"날짜 미정<br>"}
+            ${esc(c.followupNextTask||"-")}
+          </div>` : "-"}
+      </td>
+      <td>${info}</td>
+      <td><button class="btn primary" onclick="openCustomer(${c.id})">수정</button></td>
+    </tr>`;
+  });
+
+  h+=`</tbody></table></div>`;
+  document.getElementById("customerTable").innerHTML=h;
+}
+
+function renderFollowup(){
+  const box=document.getElementById("followupList");
+  if(!box)return;
+
+  const rows=customers.filter(c=>(c.status==="후속관리" || c.followNeeded) && c.status!=="종료" && c.status!=="계약완료");
+  rows.sort((a,b)=>String(a.followNextDate||"9999-99-99").localeCompare(String(b.followNextDate||"9999-99-99")));
+
+  const today=fmt(new Date());
+  const overdue=rows.filter(c=>c.followNextDate && c.followNextDate<today).length;
+  const todayCnt=rows.filter(c=>c.followNextDate===today).length;
+  const future=rows.filter(c=>c.followNextDate && c.followNextDate>today).length;
+
+  let h=`<div class="crm-grid" style="margin-bottom:12px">
+    <div class="crm-card"><div class="big">${rows.length}</div><div class="small">후속관리 고객</div></div>
+    <div class="crm-card" style="background:#fff1f2"><div class="big" style="color:#e11d48">${overdue}</div><div class="small">약속/연락 지남</div></div>
+    <div class="crm-card" style="background:#eff6ff"><div class="big" style="color:#1d4ed8">${todayCnt}</div><div class="small">오늘 약속/연락</div></div>
+    <div class="crm-card" style="background:#f0fdf4"><div class="big" style="color:#15803d">${future}</div><div class="small">앞으로 예정</div></div>
+  </div>
+  <div style="margin:0 0 10px;color:#64748b;font-size:12px">고객관리에서 <b>후속관리 필요</b>를 체크한 고객만 자동으로 표시됩니다.</div>`;
+
+  h+=`<div class="table-wrap"><table class="crm-table"><thead><tr>
+    <th>다음 약속</th><th>고객</th><th>거래</th><th>지난 안내</th><th>고객 반응</th><th>다음 안내 / 해야 할 일</th><th>전화</th><th>관리</th>
+  </tr></thead><tbody>`;
+
+  if(!rows.length) h+=`<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:28px">후속관리 체크된 진행 고객이 없습니다.</td></tr>`;
+
+  rows.forEach(c=>{
+    const isOver=c.followNextDate && c.followNextDate<today;
+    const isToday=c.followNextDate===today;
+    const nextStyle=isOver?"background:#fff1f2;color:#be123c":(isToday?"background:#dbeafe;color:#1d4ed8":"background:#f0fdf4;color:#15803d");
+    h+=`<tr>
+      <td><span style="display:inline-block;padding:5px 8px;border-radius:8px;font-weight:900;${nextStyle}">${esc(c.followNextDate||"날짜 미정")}${c.followupNextTime?`<br>${esc(c.followupNextTime)}`:""}</span></td>
+      <td><b>${esc(c.name)}</b></td>
+      <td>${dealBadge(c.deal)}</td>
+      <td>${esc(c.followLastDate||"-")}<br><span style="white-space:normal">${esc(c.followLastNote||"-")}</span></td>
+      <td><span style="white-space:normal">${esc(c.followupReaction||"-")}</span></td>
+      <td><b>${esc(c.followupNextTask||"-")}</b></td>
+      <td style="white-space:nowrap">${esc(c.phone||"-")}</td>
+      <td><button class="btn primary" onclick="openCustomer(${c.id})">고객관리에서 수정</button></td>
+    </tr>`;
+  });
+  h+=`</tbody></table></div>`;
+  box.innerHTML=h;
+}
+
+function renderExpiry(){
+  const today=fmt(current);
+  const list=customers
+    .filter(c=>c.expiry && c.status!=="종료")
+    .map(c=>({c,remind:addMonths(c.expiry,-6)}))
+    .sort((a,b)=>a.remind.localeCompare(b.remind));
+
+  const active=list.filter(x=>x.remind<=today && x.c.expiry>=today && (x.c.expiryStatus||"관리전")!=="종료");
+
+  let h=`<div class="alert-box"><b>만기 6개월 전 최초 관리 대상</b>
+    <div style="font-size:11px;color:#64748b;margin-top:4px">
+      관리 시작일이 되면 오늘업무 대시보드에도 강하게 표시됩니다.
+    </div></div>`;
+
+  if(!active.length){
+    h+=`<div class="crm-card" style="color:#64748b">현재 6개월 전 관리 시작일이 도래한 고객이 없습니다.</div>`;
+  }else{
+    active.forEach(({c,remind})=>{
+      const f=latestFollow(c);
+      h+=`<div class="expiry-critical">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+          <div>
+            <div class="expiry-title">${dealBadge(c.deal)} ${esc(c.name)} · 만기관리 시작</div>
+            <div class="expiry-sub">☎ ${esc(c.phone||"-")} · 만기 ${esc(c.expiry)} · 6개월 전 ${remind}</div>
+            <div style="margin-top:6px;font-size:12px">상태: <span class="expiry-status">${esc(c.expiryStatus||"관리전")}</span></div>
+            ${f?`<div style="margin-top:5px;font-size:11px;color:#475569">최근 통화: ${esc(f.callDate||"")} · ${esc(f.note||"")}</div>`:""}
+            ${f&&f.nextDate?`<div style="margin-top:3px;font-size:11px;color:#475569">다음 알림: ${esc(f.nextDate)} · ${notifyLabel(f.target)}</div>`:""}
+          </div>
+        </div>
+        <div class="expiry-actions">
+          <button class="btn primary" onclick="sendSms(${c.id},'expiry')">💬 고객 문자</button>
+          <button class="btn" onclick="openFollow(${c.id})">☎ 통화기록·다음알림</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'문자발송')">문자발송 표시</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'통화완료')">통화완료</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'재연락예정')">재연락예정</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'재계약검토')">재계약검토</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'이사예정')">이사예정</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'매매전환')">매매전환</button>
+          <button class="btn" onclick="setExpiryStatus(${c.id},'종료')">종료</button>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById("expiryAlerts").innerHTML=h;
+
+  let t=`<div class="table-wrap"><table class="crm-table"><thead><tr>
+    <th>고객</th><th>거래</th><th>전화</th><th>만기일</th><th>6개월 전</th><th>관리상태</th><th>최근통화</th><th>다음알림</th><th>관리</th>
+  </tr></thead><tbody>`;
+
+  list.forEach(({c,remind})=>{
+    const f=latestFollow(c);
+    t+=`<tr>
+      <td><b>${esc(c.name)}</b></td>
+      <td>${dealBadge(c.deal)}</td>
+      <td>${esc(c.phone||"-")}</td>
+      <td>${esc(c.expiry)}</td>
+      <td>${remind}</td>
+      <td><span class="expiry-status">${esc(c.expiryStatus||"관리전")}</span></td>
+      <td>${f?`${esc(f.callDate||"")}<br>${esc(f.note||"")}`:"-"}</td>
+      <td>${f&&f.nextDate?`${esc(f.nextDate)}<br>${notifyLabel(f.target)}`:"미정"}</td>
+      <td><button class="btn" onclick="openFollow(${c.id})">통화/다음알림</button></td>
+    </tr>`;
+  });
+  t+=`</tbody></table></div>`;
+  document.getElementById("expiryTable").innerHTML=t;
+}
+
+window.setExpiryStatus=(id,status)=>{
+  const c=customers.find(x=>x.id===id); if(!c)return;
+  c.expiryStatus=status;
+  if(status==="문자발송")c.firstExpirySmsAt=fmt(current);
+  saveCustomers();
+  renderAllCRM();
+};
+function renderStats(){
+  const deals=["매매","전세","월세","기타"];
+  const counts=deals.map(d=>customers.filter(c=>c.deal===d).length);
+  const ecounts=deals.map(d=>events.filter(e=>e.deal===d).length);
+  document.getElementById("statsGrid").innerHTML=deals.map((d,i)=>`
+    <div class="crm-card">${dealBadge(d)}<div class="big" style="margin-top:8px">${counts[i]}명</div><div class="small">고객 · 일정 ${ecounts[i]}건</div></div>`).join("");
+}
+
+function syncCustomerContractFields(){
+  const status=document.getElementById("cStatus").value;
+  const wrap=document.getElementById("customerContractFields");
+  const endWrap=document.getElementById("customerEndFields");
+  if(wrap) wrap.style.display=status==="계약완료"?"block":"none";
+  if(endWrap) endWrap.style.display=status==="종료"?"block":"none";
+  if(typeof syncCustomerFollowFields==="function") syncCustomerFollowFields();
+
+  if(status==="종료" && !document.getElementById("cEndDate").value){
+    document.getElementById("cEndDate").value=fmt(new Date());
+  }
+}
+document.getElementById("cStatus").addEventListener("change",syncCustomerContractFields);
+
+function syncCustomerFollowFields(){
+  const wrap=document.getElementById("customerFollowFields");
+  if(wrap) wrap.style.display=document.getElementById("cStatus").value==="후속관리"?"block":"none";
+}
+
+
+let editingCustomerId=null;
+const customerModal=document.getElementById("customerModal");
+document.getElementById("addCustomerBtn").onclick=()=>{
+  editingCustomerId=null;
+  document.getElementById("customerModalTitle").textContent="고객 등록";
+  ["cName","cPhone","cCondition","cExpiry","cMemo","cDownPayment","cDownPaymentDate","cContractDate","cBalanceDate","cBalanceAmount","cMoveInDate","cContractProperty","cContractMemo","cEndDate","cEndMemo"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cDeal").value="매매";
+  document.getElementById("cStatus").value="진행중";
+  document.getElementById("cInitialNotify").value="both";
+  document.getElementById("cEndReason").value="";
+  ["cFollowLastDate","cFollowNextDate","cFollowNextTime","cFollowLastNote","cFollowReaction","cFollowNextTask"].forEach(id=>document.getElementById(id).value="");
+  syncCustomerFollowFields();
+  document.getElementById("deleteCustomerBtn").style.display="none";
+  syncCustomerContractFields();
+  customerModal.classList.add("show");
+};
+window.openCustomer=(id)=>{
+  const c=customers.find(x=>x.id===id);if(!c)return;
+  editingCustomerId=id;document.getElementById("customerModalTitle").textContent="고객 수정";
+  document.getElementById("cName").value=c.name||"";document.getElementById("cPhone").value=c.phone||"";
+  document.getElementById("cDeal").value=c.deal||"기타";document.getElementById("cStatus").value=c.status||"진행중";
+  document.getElementById("cCondition").value=c.condition||"";document.getElementById("cExpiry").value=c.expiry||"";
+  document.getElementById("cInitialNotify").value=c.initialNotify||"both";document.getElementById("cMemo").value=c.memo||"";
+  document.getElementById("cDownPayment").value=c.downPayment||"";
+  document.getElementById("cDownPaymentDate").value=c.downPaymentDate||"";
+  document.getElementById("cContractDate").value=c.contractDate||"";
+  document.getElementById("cBalanceDate").value=c.balanceDate||"";
+  document.getElementById("cBalanceAmount").value=c.balanceAmount||"";
+  document.getElementById("cMoveInDate").value=c.moveInDate||"";
+  document.getElementById("cContractProperty").value=c.contractProperty||"";
+  document.getElementById("cContractMemo").value=c.contractMemo||"";
+  document.getElementById("cEndDate").value=c.endDate||"";
+  document.getElementById("cEndReason").value=c.endReason||"";
+  document.getElementById("cEndMemo").value=c.endMemo||"";
+  document.getElementById("cFollowLastDate").value=c.followLastDate||"";
+  document.getElementById("cFollowNextDate").value=c.followNextDate||"";
+  document.getElementById("cFollowNextTime").value=c.followNextTime||"";
+  document.getElementById("cFollowLastNote").value=c.followLastNote||"";
+  document.getElementById("cFollowReaction").value=c.followupReaction||"";
+  document.getElementById("cFollowNextTask").value=c.followupNextTask||"";
+  syncCustomerContractFields();
+  syncCustomerFollowFields();
+  document.getElementById("deleteCustomerBtn").style.display="block";customerModal.classList.add("show");
+};
+document.getElementById("cancelCustomerBtn").onclick=()=>customerModal.classList.remove("show");
+document.getElementById("saveCustomerBtn").onclick=()=>{
+  const old=customers.find(x=>x.id===editingCustomerId);
+  const obj={id:editingCustomerId||Date.now(),name:document.getElementById("cName").value||"고객",phone:document.getElementById("cPhone").value,
+    deal:document.getElementById("cDeal").value,status:document.getElementById("cStatus").value,condition:document.getElementById("cCondition").value,
+    expiry:document.getElementById("cExpiry").value,
+    initialNotify:document.getElementById("cInitialNotify").value,
+    memo:document.getElementById("cMemo").value,
+    downPayment:document.getElementById("cDownPayment").value,
+    downPaymentDate:document.getElementById("cDownPaymentDate").value,
+    contractDate:document.getElementById("cContractDate").value,
+    balanceDate:document.getElementById("cBalanceDate").value,
+    balanceAmount:document.getElementById("cBalanceAmount").value,
+    moveInDate:document.getElementById("cMoveInDate").value,
+    contractProperty:document.getElementById("cContractProperty").value,
+    contractMemo:document.getElementById("cContractMemo").value,
+    endDate:document.getElementById("cStatus").value==="종료"?document.getElementById("cEndDate").value:"",
+    endReason:document.getElementById("cStatus").value==="종료"?document.getElementById("cEndReason").value:"",
+    endMemo:document.getElementById("cStatus").value==="종료"?document.getElementById("cEndMemo").value:"",
+    expiryStatus:old?.expiryStatus||"관리전",
+    firstExpirySmsAt:old?.firstExpirySmsAt||"",
+    followups:old?.followups||[],
+    sourceSchedule:old?.sourceSchedule||false,
+    lastScheduleDate:old?.lastScheduleDate||"",
+    sourceContractId:old?.sourceContractId||null,
+followNeeded:document.getElementById("cStatus").value==="후속관리",
+    followLastDate:document.getElementById("cFollowLastDate").value,
+    followNextDate:document.getElementById("cFollowNextDate").value,
+    followupReaction:document.getElementById("cFollowReaction").value,
+    followupNextTime:document.getElementById("cFollowNextTime").value,
+    followupNextTask:document.getElementById("cFollowNextTask").value,
+    followLastNote:document.getElementById("cFollowLastNote").value,
+    createdAt:old?.createdAt||Date.now(),
+    createdDate:old?.createdDate||fmt(new Date())};
+  if(editingCustomerId){const i=customers.findIndex(x=>x.id===editingCustomerId);customers[i]=obj}else customers.push(obj);
+  saveCustomers();
+  syncCustomerFollowSchedule(obj);
+  customerModal.classList.remove("show");
+  renderAllCRM();
+  render();
+};
+document.getElementById("deleteCustomerBtn").onclick=()=>{
+  if(editingCustomerId&&confirm("이 고객을 삭제할까요?")){
+    removeCustomerFollowSchedule(editingCustomerId);
+    customers=customers.filter(x=>x.id!==editingCustomerId);
+    saveCustomers();
+    customerModal.classList.remove("show");
+    renderAllCRM();
+    render();
+  }
+};
+
+let followCustomerId=null;
+const followModal=document.getElementById("followModal");
+window.openFollow=(id)=>{
+  const c=customers.find(x=>x.id===id);if(!c)return;followCustomerId=id;
+  document.getElementById("fuCustomer").value=`${c.name} (${c.deal})`;
+  document.getElementById("fuCallDate").value=fmt(current);
+  document.getElementById("fuNextDate").value="";
+  document.getElementById("fuNote").value="";
+  if(document.getElementById("fuReaction")) document.getElementById("fuReaction").value=c.followupReaction||"";
+  if(document.getElementById("fuNextTime")) document.getElementById("fuNextTime").value=c.followupNextTime||"";
+  if(document.getElementById("fuNextTask")) document.getElementById("fuNextTask").value=c.followupNextTask||"";
+  document.getElementById("fuTarget").value="none";
+  followModal.classList.add("show");
+};
+document.getElementById("cancelFollowBtn").onclick=()=>followModal.classList.remove("show");
+document.getElementById("saveFollowBtn").onclick=()=>{
+  const c=customers.find(x=>x.id===followCustomerId);if(!c)return;
+  c.followups=c.followups||[];
+  const reaction=document.getElementById("fuReaction")?document.getElementById("fuReaction").value:"";
+  const nextTime=document.getElementById("fuNextTime")?document.getElementById("fuNextTime").value:"";
+  const nextTask=document.getElementById("fuNextTask")?document.getElementById("fuNextTask").value:"";
+  c.followupReaction=reaction;
+  c.followupNextTime=nextTime;
+  c.followupNextTask=nextTask;
+  c.followups.push({
+    callDate:document.getElementById("fuCallDate").value,
+    note:document.getElementById("fuNote").value,
+    reaction,
+    nextDate:document.getElementById("fuNextDate").value,
+    nextTime,
+    nextTask,
+    target:document.getElementById("fuTarget").value
+  });
+  saveCustomers();followModal.classList.remove("show");renderAllCRM();
+};
+window.sendSms=(id,kind)=>{
+  const c=customers.find(x=>x.id===id);if(!c)return;
+  const msg=kind==="expiry"
+   ? `안녕하세요. 포스코킹부동산입니다. 계약 만기가 약 6개월 앞으로 다가와 미리 안내드립니다. 향후 재계약·이사 계획이 정해지시면 편하게 말씀 주세요. 미리 준비해서 도와드리겠습니다.`
+   : `안녕하세요. 포스코킹부동산입니다.`;
+  if(c.phone){
+    if(kind==="expiry"){
+      c.expiryStatus="문자발송";
+      c.firstExpirySmsAt=fmt(current);
+      saveCustomers();
+      renderAllCRM();
+    }
+    location.href=`sms:${c.phone.replace(/[^0-9]/g,"")}?body=${encodeURIComponent(msg)}`;
+  }else alert("고객 전화번호가 없습니다.");
+};
+
+
+// ===== 계약완료 관리 =====
+let contracts = JSON.parse(localStorage.getItem("pkplanner_v21_contracts")||"null") || [
+  {id:201,deal:"매매",date:"2026-08-01",client:"샘플 매매고객",phone:"",property:"더샵 210동 1504호",salePrice:"5억8천",deposit:"",rent:"",moveDate:"2026-09-01",expiry:"",fee:"",memo:"샘플 계약"},
+  {id:202,deal:"전세",date:"2026-07-20",client:"샘플 전세고객",phone:"",property:"더샵 204동 2704호",salePrice:"",deposit:"4억8천",rent:"",moveDate:"2026-08-20",expiry:"2028-08-19",fee:"",memo:"샘플 계약"},
+  {id:203,deal:"월세",date:"2026-07-15",client:"샘플 월세고객",phone:"",property:"더샵 201동 704호",salePrice:"",deposit:"5000",rent:"160",moveDate:"2026-08-01",expiry:"2028-07-31",fee:"",memo:"샘플 계약"}
+];
+let contractFilter="매매";
+let editingContractId=null;
+
+function saveContracts(){localStorage.setItem("pkplanner_v21_contracts",JSON.stringify(contracts))}
+function contractClass(deal){return deal==="매매"?"sale":deal==="전세"?"jeonse":"monthly"}
+function amountText(c){
+  if(c.deal==="매매") return c.salePrice||"-";
+  if(c.deal==="전세") return `보증금 ${c.deposit||"-"}`;
+  return `보증금 ${c.deposit||"-"} / 월 ${c.rent||"-"}`;
+}
+function renderContracts(){
+  const counts={
+    매매:contracts.filter(c=>c.deal==="매매").length,
+    전세:contracts.filter(c=>c.deal==="전세").length,
+    월세:contracts.filter(c=>c.deal==="월세").length
+  };
+  document.getElementById("contractSummary").innerHTML=`
+    <div class="crm-card" style="background:#fefce8"><div class="big">${counts.매매}</div><div class="small">매매 계약완료</div></div>
+    <div class="crm-card" style="background:#f0fdf4"><div class="big">${counts.전세}</div><div class="small">전세 계약완료</div></div>
+    <div class="crm-card" style="background:#f0f9ff"><div class="big">${counts.월세}</div><div class="small">월세 계약완료</div></div>
+    <div class="crm-card"><div class="big">${contracts.length}</div><div class="small">전체 계약완료</div></div>`;
+  document.querySelectorAll("[data-contract-filter]").forEach(b=>b.classList.toggle("active",b.dataset.contractFilter===contractFilter));
+
+  const list=(contractFilter==="전체"?contracts:contracts.filter(c=>c.deal===contractFilter))
+    .slice().sort((a,b)=>b.date.localeCompare(a.date));
+
+  if(!list.length){
+    document.getElementById("contractList").innerHTML=`<div class="crm-card">등록된 ${contractFilter} 계약이 없습니다.</div>`;
+    return;
+  }
+
+  let h=`<div class="contract-card-grid">`;
+  list.forEach(c=>{
+    h+=`<div class="contract-card ${contractClass(c.deal)}">
+      <h4>${dealBadge(c.deal)} ${esc(c.client)}</h4>
+      <div class="row"><span class="label">계약일</span><span class="value">${esc(c.date||"-")}</span></div>
+      <div class="row"><span class="label">물건</span><span class="value">${esc(c.property||"-")}</span></div>
+      <div class="row"><span class="label">계약금액</span><span class="value">${esc(amountText(c))}</span></div>
+      <div class="row"><span class="label">잔금/입주</span><span class="value">${esc(c.moveDate||"-")}</span></div>
+      <div class="row"><span class="label">만기</span><span class="value">${esc(c.expiry||"-")}</span></div>
+      <div class="row"><span class="label">만기관리</span><span class="value">${(c.deal!=="매매" && c.expiry && c.expiryAuto!==false)?"6개월 전 자동연결":"-"}</span></div>
+      <div class="row"><span class="label">중개보수</span><span class="value">${esc(c.fee||"-")}</span></div>
+      <div class="row"><span class="label">메모</span><span class="value">${esc(c.memo||"-")}</span></div>
+      <div style="margin-top:9px;display:flex;gap:6px;justify-content:flex-end">
+        <button class="btn" onclick="openContract(${c.id})">상세/수정</button>
+      </div>
+    </div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("contractList").innerHTML=h;
+}
+
+const contractModal=document.getElementById("contractModal");
+function syncContractFields(){
+  const d=document.getElementById("ctDeal").value;
+  document.getElementById("salePriceWrap").style.display=d==="매매"?"block":"none";
+  document.getElementById("depositWrap").style.display=d==="매매"?"none":"block";
+  document.getElementById("rentWrap").style.display=d==="월세"?"block":"none";
+  const wrap=document.getElementById("ctExpiryAutoWrap");
+  if(wrap)wrap.style.display=d==="매매"?"none":"block";
+  if(d==="매매" && document.getElementById("ctExpiryAuto"))document.getElementById("ctExpiryAuto").checked=false;
+  if(d!=="매매" && document.getElementById("ctExpiryAuto") && editingContractId===null)document.getElementById("ctExpiryAuto").checked=true;
+}
+
+function normalizePhone(v=""){return String(v).replace(/[^0-9]/g,"")}
+function findCustomerForContract(contract){
+  const phone=normalizePhone(contract.phone||"");
+  if(phone){
+    const byPhone=customers.find(c=>normalizePhone(c.phone||"")===phone);
+    if(byPhone)return byPhone;
+  }
+  if(contract.client){
+    const byName=customers.find(c=>c.name===contract.client);
+    if(byName)return byName;
+  }
+  return null;
+}
+
+function syncContractToExpiryManagement(contract){
+  // 매매는 만기관리 대상 아님
+  if(contract.deal==="매매" || !contract.expiry || contract.expiryAuto===false)return;
+
+  let customer=findCustomerForContract(contract);
+
+  if(!customer){
+    customer={
+      id:Date.now()+Math.floor(Math.random()*1000),
+      name:contract.client||"계약고객",
+      phone:contract.phone||"",
+      deal:contract.deal,
+      status:"계약완료",
+      condition:contract.property||"",
+      expiry:contract.expiry,
+      initialNotify:"both",
+      memo:`계약완료 자동연결 · ${contract.property||""} · ${amountText(contract)}`,
+      expiryStatus:"관리전",
+      firstExpirySmsAt:"",
+      sourceContractId:contract.id,
+      followups:[]
+    };
+    customers.push(customer);
+  }else{
+    customer.phone=contract.phone||customer.phone||"";
+    customer.deal=contract.deal;
+    customer.status="계약완료";
+    customer.expiry=contract.expiry;
+    customer.initialNotify="both";
+    customer.sourceContractId=contract.id;
+    customer.condition=customer.condition||contract.property||"";
+    if(!customer.memo)customer.memo=`계약완료 자동연결 · ${contract.property||""}`;
+    if(!customer.expiryStatus)customer.expiryStatus="관리전";
+    if(!Array.isArray(customer.followups))customer.followups=[];
+  }
+
+  contract.linkedCustomerId=customer.id;
+  saveCustomers();
+}
+
+function unlinkContractExpiryManagement(contractId){
+  const c=customers.find(x=>x.sourceContractId===contractId);
+  if(c){
+    // 고객 자체는 삭제하지 않고 자동연결 표지만 해제
+    delete c.sourceContractId;
+    saveCustomers();
+  }
+}
+
+document.getElementById("ctDeal").onchange=syncContractFields;
+
+document.getElementById("addContractBtn").onclick=()=>{
+  editingContractId=null;
+  document.getElementById("contractModalTitle").textContent="계약완료 등록";
+  ["ctClient","ctPhone","ctProperty","ctSalePrice","ctDeposit","ctRent","ctMoveDate","ctExpiry","ctFee","ctMemo"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("ctDeal").value=contractFilter==="전체"?"매매":contractFilter;
+  document.getElementById("ctDate").value=fmt(current);
+  if(document.getElementById("ctExpiryAuto"))document.getElementById("ctExpiryAuto").checked=document.getElementById("ctDeal").value!=="매매";
+  document.getElementById("deleteContractBtn").style.display="none";
+  syncContractFields();
+  contractModal.classList.add("show");
+};
+
+window.openContract=(id)=>{
+  const c=contracts.find(x=>x.id===id); if(!c)return;
+  editingContractId=id;
+  document.getElementById("contractModalTitle").textContent="계약 상세 / 수정";
+  document.getElementById("ctDeal").value=c.deal;
+  document.getElementById("ctDate").value=c.date||"";
+  document.getElementById("ctClient").value=c.client||"";
+  document.getElementById("ctPhone").value=c.phone||"";
+  document.getElementById("ctProperty").value=c.property||"";
+  document.getElementById("ctSalePrice").value=c.salePrice||"";
+  document.getElementById("ctDeposit").value=c.deposit||"";
+  document.getElementById("ctRent").value=c.rent||"";
+  document.getElementById("ctMoveDate").value=c.moveDate||"";
+  document.getElementById("ctExpiry").value=c.expiry||"";
+  document.getElementById("ctFee").value=c.fee||"";
+  document.getElementById("ctMemo").value=c.memo||"";
+  if(document.getElementById("ctExpiryAuto"))document.getElementById("ctExpiryAuto").checked=c.expiryAuto!==false && c.deal!=="매매";
+  document.getElementById("deleteContractBtn").style.display="block";
+  syncContractFields();
+  contractModal.classList.add("show");
+};
+document.getElementById("cancelContractBtn").onclick=()=>contractModal.classList.remove("show");
+document.getElementById("saveContractBtn").onclick=()=>{
+  const obj={
+    id:editingContractId||Date.now(),
+    deal:document.getElementById("ctDeal").value,
+    date:document.getElementById("ctDate").value,
+    client:document.getElementById("ctClient").value||"고객",
+    phone:document.getElementById("ctPhone").value,
+    property:document.getElementById("ctProperty").value,
+    salePrice:document.getElementById("ctSalePrice").value,
+    deposit:document.getElementById("ctDeposit").value,
+    rent:document.getElementById("ctRent").value,
+    moveDate:document.getElementById("ctMoveDate").value,
+    expiry:document.getElementById("ctExpiry").value,
+    fee:document.getElementById("ctFee").value,
+    memo:document.getElementById("ctMemo").value,
+    expiryAuto:document.getElementById("ctExpiryAuto")?document.getElementById("ctExpiryAuto").checked:false,
+    linkedCustomerId:(contracts.find(x=>x.id===editingContractId)||{}).linkedCustomerId||null
+  };
+  if(editingContractId){
+    const i=contracts.findIndex(x=>x.id===editingContractId);
+    if(i>=0)contracts[i]=obj;
+  }else{
+    contracts.push(obj);
+  }
+
+  // 전세·월세 계약은 저장 즉시 고객관리/만기관리 자동 연결
+  if(obj.deal!=="매매" && obj.expiry && obj.expiryAuto!==false){
+    syncContractToExpiryManagement(obj);
+  }else if(editingContractId){
+    unlinkContractExpiryManagement(obj.id);
+  }
+
+  saveContracts();
+  contractModal.classList.remove("show");
+  renderAllCRM();
+
+  if(obj.deal!=="매매" && obj.expiry && obj.expiryAuto!==false){
+    const remind=addMonths(obj.expiry,-6);
+    alert(`계약이 저장되었습니다.\n\n만기관리 자동 연결 완료\n만기일: ${obj.expiry}\n6개월 전 관리 시작일: ${remind}\n알림 대상: 나 + 고객`);
+  }
+};
+document.getElementById("deleteContractBtn").onclick=()=>{
+  if(editingContractId && confirm("이 계약 기록을 삭제할까요?")){
+    unlinkContractExpiryManagement(editingContractId);
+    contracts=contracts.filter(x=>x.id!==editingContractId);
+    saveContracts();
+    contractModal.classList.remove("show");
+    renderContracts();
+  }
+};
+document.querySelectorAll("[data-contract-filter]").forEach(b=>{
+  b.onclick=()=>{contractFilter=b.dataset.contractFilter;renderContracts()};
+});
+
+
+// ===== 접수매물 관리 =====
+let listings = JSON.parse(localStorage.getItem("pkplanner_v21_listings")||"null") || [
+  {id:301,deal:"월세",date:"2026-08-08",property:"제이티플라자 504호",status:"공실",owner:"주인",phone:"010-5168-5556",salePrice:"",deposit:"3000",rent:"120",memo:"조"}
+];
+let listingFilter="월세";
+let editingListingId=null;
+
+function saveListings(){localStorage.setItem("pkplanner_v21_listings",JSON.stringify(listings))}
+function listingClass(deal){return deal==="매매"?"sale":deal==="전세"?"jeonse":"monthly"}
+function listingAmount(l){
+  if(l.deal==="매매") return l.salePrice||"-";
+  if(l.deal==="전세") return `보증금 ${l.deposit||"-"}`;
+  return `보증금 ${l.deposit||"-"} / 월 ${l.rent||"-"}`;
+}
+function renderListings(){
+  const counts={
+    매매:listings.filter(x=>x.deal==="매매").length,
+    전세:listings.filter(x=>x.deal==="전세").length,
+    월세:listings.filter(x=>x.deal==="월세").length
+  };
+  document.getElementById("listingSummary").innerHTML=`
+    <div class="crm-card" style="background:#fefce8"><div class="big">${counts.매매}</div><div class="small">매매 접수</div></div>
+    <div class="crm-card" style="background:#f0fdf4"><div class="big">${counts.전세}</div><div class="small">전세 접수</div></div>
+    <div class="crm-card" style="background:#f0f9ff"><div class="big">${counts.월세}</div><div class="small">월세 접수</div></div>
+    <div class="crm-card"><div class="big">${listings.length}</div><div class="small">전체 접수매물</div></div>`;
+  document.querySelectorAll("[data-listing-filter]").forEach(b=>b.classList.toggle("active",b.dataset.listingFilter===listingFilter));
+  const list=(listingFilter==="전체"?listings:listings.filter(x=>x.deal===listingFilter))
+    .slice().sort((a,b)=>b.date.localeCompare(a.date));
+  if(!list.length){
+    document.getElementById("listingList").innerHTML=`<div class="crm-card">등록된 ${listingFilter} 매물이 없습니다.</div>`;
+    return;
+  }
+  let h=`<div class="listing-card-grid">`;
+  list.forEach(l=>{
+    h+=`<div class="listing-card ${listingClass(l.deal)}">
+      <h4 style="margin:0 0 8px">${dealBadge(l.deal)} ${esc(l.property)}</h4>
+      <div class="row"><span class="label">접수일</span><span class="value">${esc(l.date||"-")}</span></div>
+      <div class="row"><span class="label">상태</span><span class="value">${esc(l.status||"-")}</span></div>
+      <div class="row"><span class="label">조건</span><span class="value">${esc(listingAmount(l))}</span></div>
+      <div class="row"><span class="label">소유자</span><span class="value">${esc(l.owner||"-")}</span></div>
+      <div class="row"><span class="label">연락처</span><span class="value">${esc(l.phone||"-")}</span></div>
+      <div class="row"><span class="label">메모</span><span class="value">${esc(l.memo||"-")}</span></div>
+      <div style="margin-top:9px;display:flex;gap:6px;justify-content:flex-end">
+        <button class="btn" onclick="openListing(${l.id})">상세/수정</button>
+      </div>
+    </div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("listingList").innerHTML=h;
+}
+
+const listingModal=document.getElementById("listingModal");
+function syncListingFields(){
+  const d=document.getElementById("lsDeal").value;
+  document.getElementById("lsSaleWrap").style.display=d==="매매"?"block":"none";
+  document.getElementById("lsDepositWrap").style.display=d==="매매"?"none":"block";
+  document.getElementById("lsRentWrap").style.display=d==="월세"?"block":"none";
+}
+document.getElementById("lsDeal").onchange=syncListingFields;
+
+document.getElementById("addListingBtn").onclick=()=>{
+  editingListingId=null;
+  document.getElementById("listingModalTitle").textContent="접수매물 등록";
+  ["lsProperty","lsOwner","lsPhone","lsSalePrice","lsDeposit","lsRent","lsMemo"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("lsDeal").value=listingFilter==="전체"?"매매":listingFilter;
+  document.getElementById("lsDate").value=fmt(current);
+  document.getElementById("lsStatus").value="공실";
+  document.getElementById("deleteListingBtn").style.display="none";
+  syncListingFields();
+  listingModal.classList.add("show");
+};
+
+window.openListing=(id)=>{
+  const l=listings.find(x=>x.id===id);if(!l)return;
+  editingListingId=id;
+  document.getElementById("listingModalTitle").textContent="접수매물 상세 / 수정";
+  document.getElementById("lsDeal").value=l.deal;
+  document.getElementById("lsDate").value=l.date||"";
+  document.getElementById("lsProperty").value=l.property||"";
+  document.getElementById("lsStatus").value=l.status||"공실";
+  document.getElementById("lsOwner").value=l.owner||"";
+  document.getElementById("lsPhone").value=l.phone||"";
+  document.getElementById("lsSalePrice").value=l.salePrice||"";
+  document.getElementById("lsDeposit").value=l.deposit||"";
+  document.getElementById("lsRent").value=l.rent||"";
+  document.getElementById("lsMemo").value=l.memo||"";
+  document.getElementById("deleteListingBtn").style.display="block";
+  syncListingFields();
+  listingModal.classList.add("show");
+};
+document.getElementById("cancelListingBtn").onclick=()=>listingModal.classList.remove("show");
+document.getElementById("saveListingBtn").onclick=()=>{
+  const obj={
+    id:editingListingId||Date.now(),
+    deal:document.getElementById("lsDeal").value,
+    date:document.getElementById("lsDate").value,
+    property:document.getElementById("lsProperty").value||"매물",
+    status:document.getElementById("lsStatus").value,
+    owner:document.getElementById("lsOwner").value||"주인",
+    phone:document.getElementById("lsPhone").value,
+    salePrice:document.getElementById("lsSalePrice").value,
+    deposit:document.getElementById("lsDeposit").value,
+    rent:document.getElementById("lsRent").value,
+    memo:document.getElementById("lsMemo").value
+  };
+  if(editingListingId){
+    const i=listings.findIndex(x=>x.id===editingListingId);if(i>=0)listings[i]=obj;
+  }else listings.push(obj);
+  saveListings();listingModal.classList.remove("show");renderListings();
+};
+document.getElementById("deleteListingBtn").onclick=()=>{
+  if(editingListingId&&confirm("이 매물을 삭제할까요?")){
+    listings=listings.filter(x=>x.id!==editingListingId);
+    saveListings();listingModal.classList.remove("show");renderListings();
+  }
+};
+document.querySelectorAll("[data-listing-filter]").forEach(b=>{
+  b.onclick=()=>{listingFilter=b.dataset.listingFilter;renderListings()};
+});
+
+// 일정 입력 시 매물접수면 전용 필드 표시
+function syncScheduleListingFields(){
+  const isListing=document.getElementById("fType").value==="매물접수";
+  document.getElementById("listingQuickFields").style.display=isListing?"block":"none";
+  const d=document.getElementById("fDeal").value;
+  document.getElementById("fSaleWrap").style.display=d==="매매"?"block":"none";
+  document.getElementById("fDepositWrap").style.display=d==="매매"?"none":"block";
+  document.getElementById("fRentWrap").style.display=d==="월세"?"block":"none";
+}
+document.getElementById("fType").addEventListener("change",syncScheduleListingFields);
+document.getElementById("fDeal").addEventListener("change",syncScheduleListingFields);
+
+
+// ===== 가계부 =====
+let cashEntries = JSON.parse(localStorage.getItem("pkplanner_v21_cash")||"null") || [
+  {id:401,date:"2026-08-08",type:"expense",amount:12000,category:"식비",title:"점심 식사",memo:""},
+  {id:402,date:"2026-08-08",type:"income",amount:300000,category:"중개보수",title:"중개보수 입금",memo:"샘플"}
+];
+let cashView="day";
+let cashCurrent=localTodayNoon();
+let editingCashId=null;
+
+function saveCash(){localStorage.setItem("pkplanner_v21_cash",JSON.stringify(cashEntries))}
+function won(n){return Number(n||0).toLocaleString("ko-KR")+"원"}
+function cashRange(){
+  if(cashView==="day"){const d=fmt(cashCurrent);return [d,d]}
+  if(cashView==="week"){const s=startOfWeek(cashCurrent);let e=new Date(s);e.setDate(e.getDate()+6);return [fmt(s),fmt(e)]}
+  if(cashView==="month"){
+    const y=cashCurrent.getFullYear(),m=cashCurrent.getMonth();
+    return [fmt(new Date(y,m,1,12)),fmt(new Date(y,m+1,0,12))]
+  }
+  return [`${cashCurrent.getFullYear()}-01-01`,`${cashCurrent.getFullYear()}-12-31`]
+}
+function renderCashbook(){
+  const [from,to]=cashRange();
+  const list=cashEntries.filter(x=>x.date>=from&&x.date<=to).slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id-a.id);
+  const income=list.filter(x=>x.type==="income").reduce((s,x)=>s+Number(x.amount||0),0);
+  const expense=list.filter(x=>x.type==="expense").reduce((s,x)=>s+Number(x.amount||0),0);
+  document.getElementById("cashSummary").innerHTML=`
+    <div class="cash-card income"><div class="amt">${won(income)}</div><div class="lbl">입금 합계</div></div>
+    <div class="cash-card expense"><div class="amt">${won(expense)}</div><div class="lbl">지출 합계</div></div>
+    <div class="cash-card balance"><div class="amt">${won(income-expense)}</div><div class="lbl">차액</div></div>
+    <div class="cash-card"><div class="amt">${list.length}건</div><div class="lbl">${from===to?from:`${from} ~ ${to}`}</div></div>`;
+  document.querySelectorAll("[data-cash-view]").forEach(b=>b.classList.toggle("active",b.dataset.cashView===cashView));
+  document.getElementById("cashDatePick").value=fmt(cashCurrent);
+
+  let h=`<div class="table-wrap"><table class="crm-table"><thead><tr>
+    <th>날짜</th><th>구분</th><th>분류</th><th>내용</th><th>금액</th><th>메모</th><th></th>
+  </tr></thead><tbody>`;
+  if(!list.length){
+    h+=`<tr><td colspan="7" style="text-align:center;color:#64748b;padding:25px">등록된 입출금 내역이 없습니다.</td></tr>`;
+  }else{
+    list.forEach(x=>{
+      h+=`<tr>
+        <td>${esc(x.date)}</td>
+        <td>${x.type==="income"?'<span class="badge jeonse">입금</span>':'<span class="badge sale">지출</span>'}</td>
+        <td>${esc(x.category||"-")}</td>
+        <td><b>${esc(x.title||"-")}</b></td>
+        <td class="${x.type==="income"?"money-plus":"money-minus"}">${x.type==="income"?"+":"-"}${won(x.amount)}</td>
+        <td>${esc(x.memo||"-")}</td>
+        <td><button class="btn" onclick="openCash(${x.id})">수정</button></td>
+      </tr>`;
+    });
+  }
+  h+=`</tbody></table></div>`;
+  document.getElementById("cashList").innerHTML=h;
+}
+const cashModal=document.getElementById("cashModal");
+document.getElementById("addCashBtn").onclick=()=>{
+  editingCashId=null;
+  document.getElementById("cashModalTitle").textContent="입출금 등록";
+  document.getElementById("cbDate").value=fmt(cashCurrent);
+  document.getElementById("cbType").value="expense";
+  document.getElementById("cbAmount").value="";
+  document.getElementById("cbCategory").value="식비";
+  document.getElementById("cbTitle").value="";
+  document.getElementById("cbMemo").value="";
+  document.getElementById("deleteCashBtn").style.display="none";
+  cashModal.classList.add("show");
+};
+window.openCash=(id)=>{
+  const x=cashEntries.find(v=>v.id===id);if(!x)return;
+  editingCashId=id;
+  document.getElementById("cashModalTitle").textContent="입출금 수정";
+  document.getElementById("cbDate").value=x.date||"";
+  document.getElementById("cbType").value=x.type||"expense";
+  document.getElementById("cbAmount").value=x.amount||"";
+  document.getElementById("cbCategory").value=x.category||"기타지출";
+  document.getElementById("cbTitle").value=x.title||"";
+  document.getElementById("cbMemo").value=x.memo||"";
+  document.getElementById("deleteCashBtn").style.display="block";
+  cashModal.classList.add("show");
+};
+document.getElementById("cancelCashBtn").onclick=()=>cashModal.classList.remove("show");
+document.getElementById("saveCashBtn").onclick=()=>{
+  const obj={
+    id:editingCashId||Date.now(),
+    date:document.getElementById("cbDate").value,
+    type:document.getElementById("cbType").value,
+    amount:Number(document.getElementById("cbAmount").value||0),
+    category:document.getElementById("cbCategory").value,
+    title:document.getElementById("cbTitle").value||"입출금",
+    memo:document.getElementById("cbMemo").value
+  };
+  if(editingCashId){
+    const i=cashEntries.findIndex(x=>x.id===editingCashId);if(i>=0)cashEntries[i]=obj;
+  }else cashEntries.push(obj);
+  saveCash();cashModal.classList.remove("show");renderCashbook();
+};
+document.getElementById("deleteCashBtn").onclick=()=>{
+  if(editingCashId&&confirm("이 입출금 내역을 삭제할까요?")){
+    cashEntries=cashEntries.filter(x=>x.id!==editingCashId);
+    saveCash();cashModal.classList.remove("show");renderCashbook();
+  }
+};
+document.querySelectorAll("[data-cash-view]").forEach(b=>{
+  b.onclick=()=>{cashView=b.dataset.cashView;renderCashbook()};
+});
+document.getElementById("cashPrevBtn").onclick=()=>{
+  if(cashView==="day")cashCurrent.setDate(cashCurrent.getDate()-1);
+  else if(cashView==="week")cashCurrent.setDate(cashCurrent.getDate()-7);
+  else if(cashView==="month")cashCurrent.setMonth(cashCurrent.getMonth()-1);
+  else cashCurrent.setFullYear(cashCurrent.getFullYear()-1);
+  renderCashbook();
+};
+document.getElementById("cashNextBtn").onclick=()=>{
+  if(cashView==="day")cashCurrent.setDate(cashCurrent.getDate()+1);
+  else if(cashView==="week")cashCurrent.setDate(cashCurrent.getDate()+7);
+  else if(cashView==="month")cashCurrent.setMonth(cashCurrent.getMonth()+1);
+  else cashCurrent.setFullYear(cashCurrent.getFullYear()+1);
+  renderCashbook();
+};
+document.getElementById("cashTodayBtn").onclick=()=>{cashCurrent=localTodayNoon();renderCashbook()};
+document.getElementById("cashDatePick").onchange=()=>{cashCurrent=new Date(document.getElementById("cashDatePick").value+"T12:00:00");renderCashbook()};
+
+
+// ===== 하루 루틴 =====
+let routines = JSON.parse(localStorage.getItem("pkplanner_v25_routines")||"null") || [
+  {id:501,name:"새벽 6시 기상",category:"개인",repeat:"daily"},
+  {id:502,name:"8시30분 출근",category:"업무",repeat:"daily"},
+  {id:503,name:"현장촬영 다녀오기 + 유튜브·블로그·숏츠 올리기",category:"홍보",repeat:"daily"},
+  {id:504,name:"목표 100번 쓰기",category:"개인",repeat:"daily"},
+  {id:505,name:"수영 가기",category:"개인",repeat:"daily"}
+];
+let routineChecks = JSON.parse(localStorage.getItem("pkplanner_v25_routineChecks")||"{}");
+let routineCurrent = localTodayNoon();
+
+function saveRoutines(){
+  localStorage.setItem("pkplanner_v25_routines",JSON.stringify(routines));
+  localStorage.setItem("pkplanner_v25_routineChecks",JSON.stringify(routineChecks));
+}
+function applicableRoutines(date){
+  const day=date.getDay();
+  return routines.filter(r=>{
+    if(r.repeat==="daily")return true;
+    if(r.repeat==="weekday")return day>=1&&day<=5;
+    if(r.repeat==="weekend")return day===0||day===6;
+    return true;
+  });
+}
+function dayRoutinePct(date){
+  const ds=fmt(date), list=applicableRoutines(date);
+  if(!list.length)return 0;
+  const checked=routineChecks[ds]||{};
+  const done=list.filter(r=>checked[r.id]).length;
+  return Math.round(done/list.length*100);
+}
+function rangeRoutinePct(start,end){
+  let total=0,done=0;
+  let d=new Date(start);
+  while(d<=end){
+    const ds=fmt(d), list=applicableRoutines(d), checked=routineChecks[ds]||{};
+    total+=list.length;
+    done+=list.filter(r=>checked[r.id]).length;
+    d.setDate(d.getDate()+1);
+  }
+  return total?Math.round(done/total*100):0;
+}
+function weekRange(base,offsetWeeks=0){
+  let s=startOfWeek(base);s.setDate(s.getDate()+7*offsetWeeks);
+  let e=new Date(s);e.setDate(e.getDate()+6);
+  return [s,e];
+}
+function monthRange(base,offsetMonths=0){
+  let y=base.getFullYear(),m=base.getMonth()+offsetMonths;
+  let s=new Date(y,m,1,12),e=new Date(y,m+1,0,12);
+  return [s,e];
+}
+function renderCompareBar(label,pct){
+  return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+    <div class="bar-value">${pct}%</div>
+  </div>`;
+}
+function renderRoutine(){
+  const ds=fmt(routineCurrent), list=applicableRoutines(routineCurrent), checked=routineChecks[ds]||{};
+  document.getElementById("routineDatePick").value=ds;
+  document.getElementById("routineDateLabel").textContent=`${routineCurrent.getFullYear()}년 ${routineCurrent.getMonth()+1}월 ${routineCurrent.getDate()}일 루틴`;
+
+  let done=list.filter(r=>checked[r.id]).length;
+  let pct=list.length?Math.round(done/list.length*100):0;
+  document.getElementById("routinePct").textContent=`${pct}%`;
+  document.getElementById("routineProgressBar").style.width=`${pct}%`;
+
+  document.getElementById("routineList").innerHTML=list.map(r=>`
+    <div class="routine-item ${checked[r.id]?"done":""}">
+      <input type="checkbox" ${checked[r.id]?"checked":""} onchange="toggleRoutine(${r.id},this.checked)">
+      <div><div class="name">${esc(r.name)}</div><div class="rate">${esc(r.category)} · ${r.repeat==="daily"?"매일":r.repeat==="weekday"?"평일":"주말"}</div></div>
+      <button class="btn danger" onclick="deleteRoutine(${r.id})">삭제</button>
+    </div>`).join("") || `<div style="color:#64748b">등록된 루틴이 없습니다.</div>`;
+
+  // recent 30-day per-routine rate
+  let rateHtml="";
+  routines.forEach(r=>{
+    let total=0,rdone=0;
+    let d=new Date(routineCurrent);d.setDate(d.getDate()-29);
+    for(let i=0;i<30;i++){
+      const ad=applicableRoutines(d).some(x=>x.id===r.id);
+      if(ad){
+        total++;
+        const c=routineChecks[fmt(d)]||{};
+        if(c[r.id])rdone++;
+      }
+      d.setDate(d.getDate()+1);
+    }
+    const rpct=total?Math.round(rdone/total*100):0;
+    rateHtml+=renderCompareBar(r.name,rpct);
+  });
+  document.getElementById("routineRates").innerHTML=rateHtml||"-";
+
+  const [w1s,w1e]=weekRange(routineCurrent,0);
+  const [w2s,w2e]=weekRange(routineCurrent,1);
+  document.getElementById("weeklyGraph").innerHTML=
+    renderCompareBar("이번 주",rangeRoutinePct(w1s,w1e))+
+    renderCompareBar("다음 주",rangeRoutinePct(w2s,w2e));
+
+  const [m1s,m1e]=monthRange(routineCurrent,0);
+  const [m2s,m2e]=monthRange(routineCurrent,1);
+  document.getElementById("monthlyGraph").innerHTML=
+    renderCompareBar("이번 달",rangeRoutinePct(m1s,m1e))+
+    renderCompareBar("다음 달",rangeRoutinePct(m2s,m2e));
+
+  renderRoutineIndividualGraphs();
+  renderRoutineMonthCalendar();
+}
+
+function routineRateForRange(routineId,start,end){
+  let total=0,done=0;
+  let d=new Date(start);
+  while(d<=end){
+    const applies=applicableRoutines(d).some(r=>r.id===routineId);
+    if(applies){
+      total++;
+      const checked=routineChecks[fmt(d)]||{};
+      if(checked[routineId])done++;
+    }
+    d.setDate(d.getDate()+1);
+  }
+  return total?Math.round(done/total*100):0;
+}
+function miniRoutineBar(label,pct){
+  return `<div class="routine-mini-bar">
+    <div class="routine-mini-label">${label}</div>
+    <div class="routine-mini-track"><div class="routine-mini-fill" style="width:${pct}%"></div></div>
+    <div class="routine-mini-value">${pct}%</div>
+  </div>`;
+}
+function renderRoutineIndividualGraphs(){
+  const box=document.getElementById("routineIndividualGraphs");
+  if(!box)return;
+
+  const [w1s,w1e]=weekRange(routineCurrent,0);
+  const [w2s,w2e]=weekRange(routineCurrent,1);
+  const [m1s,m1e]=monthRange(routineCurrent,0);
+  const [m2s,m2e]=monthRange(routineCurrent,1);
+
+  box.innerHTML=routines.map((r,idx)=>{
+    const w1=routineRateForRange(r.id,w1s,w1e);
+    const w2=routineRateForRange(r.id,w2s,w2e);
+    const m1=routineRateForRange(r.id,m1s,m1e);
+    const m2=routineRateForRange(r.id,m2s,m2e);
+
+    return `<div class="routine-individual-card">
+      <h4>${idx+1}. ${esc(r.name)}</h4>
+      ${miniRoutineBar("이번 주",w1)}
+      ${miniRoutineBar("다음 주",w2)}
+      ${miniRoutineBar("이번 달",m1)}
+      ${miniRoutineBar("다음 달",m2)}
+    </div>`;
+  }).join("") || `<div style="color:#64748b">등록된 루틴이 없습니다.</div>`;
+}
+
+function renderRoutineMonthCalendar(){
+  const y=routineCurrent.getFullYear(),m=routineCurrent.getMonth();
+  const first=new Date(y,m,1,12),last=new Date(y,m+1,0,12);
+  const startPad=(first.getDay()+6)%7;
+  let h=`<div class="routine-calendar">${["월","화","수","목","금","토","일"].map(x=>`<div style="font-size:11px;font-weight:700;text-align:center;color:#64748b">${x}</div>`).join("")}`;
+  for(let i=0;i<startPad;i++)h+=`<div class="rcell empty"></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const date=new Date(y,m,d,12);
+    const p=dayRoutinePct(date);
+    const has=Object.keys(routineChecks[fmt(date)]||{}).length>0;
+    const cls=!has?"empty":p>=80?"good":p>=50?"mid":"low";
+    h+=`<div class="rcell ${cls}"><div>${d}</div><div class="pct">${has?p+"%":"-"}</div></div>`;
+  }
+  h+=`</div>`;
+  document.getElementById("routineMonthCalendar").innerHTML=h;
+}
+window.toggleRoutine=(id,val)=>{
+  const ds=fmt(routineCurrent);
+  routineChecks[ds]=routineChecks[ds]||{};
+  routineChecks[ds][id]=val;
+  saveRoutines();renderRoutine();
+};
+window.deleteRoutine=(id)=>{
+  if(confirm("이 루틴을 삭제할까요?")){
+    routines=routines.filter(r=>r.id!==id);
+    Object.values(routineChecks).forEach(day=>delete day[id]);
+    saveRoutines();renderRoutine();
+  }
+};
+const routineModal=document.getElementById("routineModal");
+document.getElementById("addRoutineBtn").onclick=()=>{
+  document.getElementById("rtName").value="";
+  document.getElementById("rtCategory").value="업무";
+  document.getElementById("rtRepeat").value="daily";
+  routineModal.classList.add("show");
+};
+document.getElementById("cancelRoutineBtn").onclick=()=>routineModal.classList.remove("show");
+document.getElementById("saveRoutineBtn").onclick=()=>{
+  const name=document.getElementById("rtName").value.trim();
+  if(!name){alert("루틴 이름을 입력해 주세요.");return}
+  routines.push({id:Date.now(),name,category:document.getElementById("rtCategory").value,repeat:document.getElementById("rtRepeat").value});
+  saveRoutines();routineModal.classList.remove("show");renderRoutine();
+};
+document.getElementById("routinePrevBtn").onclick=()=>{routineCurrent.setDate(routineCurrent.getDate()-1);renderRoutine()};
+document.getElementById("routineNextBtn").onclick=()=>{routineCurrent.setDate(routineCurrent.getDate()+1);renderRoutine()};
+document.getElementById("routineTodayBtn").onclick=()=>{routineCurrent=localTodayNoon();renderRoutine()};
+document.getElementById("routineDatePick").onchange=()=>{routineCurrent=new Date(document.getElementById("routineDatePick").value+"T12:00:00");renderRoutine()};
+
+
+// ===== 오늘 업무 대시보드 + 고객·매물 매칭 =====
+function goSection(id){
+  const btn=document.querySelector(`.nav button[data-section="${id}"]`);
+  if(btn)btn.click();
+}
+window.goSection=goSection;
+
+function routineTodayPct(){
+  const d=new Date(current), ds=fmt(d), list=typeof applicableRoutines==="function"?applicableRoutines(d):[];
+  if(!list.length)return 0;
+  const checked=routineChecks[ds]||{};
+  return Math.round(list.filter(r=>checked[r.id]).length/list.length*100);
+}
+
+function renderDashboard(){
+  const today=fmt(current);
+  const todayEvents=events.filter(e=>e.date===today).slice().sort((a,b)=>a.time.localeCompare(b.time));
+  const pending=todayEvents.filter(e=>(e.status||"todo")!=="done").length;
+
+  const dueFollow=[];
+  customers.forEach(c=>{
+    const f=latestFollow(c);
+    if(f&&f.nextDate&&f.nextDate<=today)dueFollow.push({c,f});
+  });
+
+  const expiryDue=[];
+  customers.filter(c=>c.expiry).forEach(c=>{
+    const remind=addMonths(c.expiry,-6);
+    if(remind<=today && c.expiry>=today)expiryDue.push({c,remind});
+  });
+
+  const routinePct=routineTodayPct();
+  const todayCash=(typeof cashEntries!=="undefined"?cashEntries:[]).filter(x=>x.date===today);
+  const income=todayCash.filter(x=>x.type==="income").reduce((s,x)=>s+Number(x.amount||0),0);
+  const expense=todayCash.filter(x=>x.type==="expense").reduce((s,x)=>s+Number(x.amount||0),0);
+
+  document.getElementById("dashboardSummary").innerHTML=`
+    <div class="dashboard-card"><div class="big">${todayEvents.length}</div><div class="small">오늘 업무</div></div>
+    <div class="dashboard-card"><div class="big">${pending}</div><div class="small">미처리/예정</div></div>
+    <div class="dashboard-card"><div class="big">${dueFollow.length}</div><div class="small">후속 연락 필요</div></div>
+    <div class="dashboard-card"><div class="big">${routinePct}%</div><div class="small">오늘 루틴 달성률</div></div>`;
+
+  let eh="";
+  if(!todayEvents.length) eh=`<div style="color:#64748b">오늘 등록된 업무가 없습니다.</div>`;
+  todayEvents.forEach(e=>{
+    const st=(e.status||"todo")==="done"?"완료":(e.status==="hold"?"보류":"예정");
+    eh+=`<div class="todo-row">
+      <div style="font-weight:800">${esc(e.time)}</div>
+      <div>${dealBadge(e.deal||"기타")} <b>${esc(e.client)}</b> · ${esc(e.type)} · ${esc(e.title)}<br>
+      <span style="font-size:11px;color:#0f172a;font-weight:700">☎ ${esc(e.phone||"-")}</span><br>
+      <span style="font-size:11px;color:#64748b">메모: ${esc(e.memo||"-")} / 후기: ${esc(e.review||"-")}</span></div>
+      <div><span class="badge etc">${st}</span></div>
+    </div>`;
+  });
+  document.getElementById("dashboardTodayEvents").innerHTML=eh;
+
+  let todo="";
+  dueFollow.forEach(({c,f})=>{
+    todo+=`<div class="todo-row"><div>☎️</div><div><b>${esc(c.name)}</b> · 후속연락일 ${esc(f.nextDate)}<br><span style="font-size:11px;color:#64748b">${esc(f.note||"")}</span></div><button class="btn primary" onclick="openFollow(${c.id})">통화기록</button></div>`;
+  });
+  expiryDue.forEach(({c,remind})=>{
+    if((c.expiryStatus||"관리전")==="종료")return;
+    const f=latestFollow(c);
+    todo+=`<div class="expiry-critical">
+      <div class="expiry-title">⏰ 만기 6개월 관리 · ${esc(c.name)}</div>
+      <div class="expiry-sub">${dealBadge(c.deal)} ☎ ${esc(c.phone||"-")} · 만기 ${esc(c.expiry)} · 관리시작 ${remind}</div>
+      <div style="margin-top:6px;font-size:12px">
+        상태: <span class="expiry-status">${esc(c.expiryStatus||"관리전")}</span>
+        ${f&&f.nextDate?` · 다음알림 ${esc(f.nextDate)} (${notifyLabel(f.target)})`:""}
+      </div>
+      <div class="expiry-actions">
+        <button class="btn primary" onclick="sendSms(${c.id},'expiry')">💬 고객 문자</button>
+        <button class="btn" onclick="openFollow(${c.id})">☎ 통화기록</button>
+        <button class="btn" onclick="openFollow(${c.id})">📅 다음 알림</button>
+        <button class="btn" onclick="goSection('expiry')">전체 만기관리</button>
+      </div>
+    </div>`;
+  });
+  events.filter(e=>e.followDate&&e.followDate<=today&&(e.status||"todo")!=="done").forEach(e=>{
+    todo+=`<div class="todo-row"><div>📌</div><div><b>${esc(e.client)}</b> · ${esc(e.title)}<br><span style="font-size:11px;color:#64748b">다음 연락 ${esc(e.followDate)}</span></div><button class="btn" onclick="editEvent(${e.id})">열기</button></div>`;
+  });
+  if(!todo)todo=`<div style="color:#64748b">오늘 꼭 확인할 미처리 고객이 없습니다.</div>`;
+  document.getElementById("dashboardTodo").innerHTML=todo;
+
+  const rlist=typeof applicableRoutines==="function"?applicableRoutines(new Date(current)):[];
+  const checks=routineChecks[today]||{};
+  document.getElementById("dashboardRoutinePct").textContent=`달성률 ${routinePct}%`;
+  document.getElementById("dashboardRoutine").innerHTML=rlist.map(r=>`
+    <span style="display:inline-block;margin:4px 6px 4px 0;padding:5px 8px;border-radius:999px;background:${checks[r.id]?"#dcfce7":"#f1f5f9"};font-size:11px">
+    ${checks[r.id]?"✓":"○"} ${esc(r.name)}</span>`).join("") || "-";
+}
+
+function tokenize(s=""){
+  return s.toLowerCase()
+    .replace(/[|/(),·]/g," ")
+    .split(/\s+/)
+    .map(x=>x.trim())
+    .filter(x=>x.length>=2);
+}
+function getMatchScore(customer,listing){
+  let score=0,reasons=[];
+  if(customer.deal===listing.deal){score+=60;reasons.push("거래유형 일치")}
+  const cwords=new Set(tokenize((customer.condition||"")+" "+(customer.memo||"")));
+  const lwords=new Set(tokenize((listing.property||"")+" "+(listing.memo||"")+" "+(listing.status||"")));
+  const common=[...cwords].filter(w=>[...lwords].some(lw=>lw.includes(w)||w.includes(lw)));
+  if(common.length){score+=Math.min(30,common.length*10);reasons.push(`공통키워드 ${common.slice(0,3).join(", ")}`)}
+  if(listing.status==="공실"){score+=5;reasons.push("공실")}
+  return {score:Math.min(100,score),reasons};
+}
+function renderMatching(){
+  let pairs=[];
+  customers.filter(c=>c.status==="진행중"||c.status==="대기").forEach(c=>{
+    listings.forEach(l=>{
+      const m=getMatchScore(c,l);
+      if(m.score>=60)pairs.push({c,l,...m});
+    });
+  });
+  pairs.sort((a,b)=>b.score-a.score);
+
+  document.getElementById("matchingSummary").innerHTML=`
+    <div class="crm-card"><div class="big">${customers.filter(c=>c.status==="진행중"||c.status==="대기").length}</div><div class="small">매칭대상 고객</div></div>
+    <div class="crm-card"><div class="big">${listings.length}</div><div class="small">접수매물</div></div>
+    <div class="crm-card"><div class="big">${pairs.length}</div><div class="small">추천 조합</div></div>
+    <div class="crm-card"><div class="big">${pairs.filter(p=>p.score>=80).length}</div><div class="small">강한 매칭 80점↑</div></div>`;
+
+  if(!pairs.length){
+    document.getElementById("matchingList").innerHTML=`<div class="crm-card">현재 자동으로 매칭되는 고객·매물 조합이 없습니다.</div>`;
+    return;
+  }
+
+  document.getElementById("matchingList").innerHTML=pairs.map(p=>`
+    <div class="match-card">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <div>${dealBadge(p.c.deal)} <b>${esc(p.c.name)}</b></div>
+        <span class="match-score">${p.score}점</span>
+      </div>
+      <div style="margin-top:8px;font-size:12px"><b>고객조건</b> · ${esc(p.c.condition||"-")}</div>
+      <div style="margin-top:5px;font-size:12px"><b>추천매물</b> · ${esc(p.l.property)} · ${esc(listingAmount(p.l))}</div>
+      <div class="match-reason">${esc(p.reasons.join(" · "))}</div>
+      <div style="margin-top:9px;display:flex;gap:6px;justify-content:flex-end">
+        <button class="btn" onclick="openCustomer(${p.c.id})">고객보기</button>
+        <button class="btn" onclick="openListing(${p.l.id})">매물보기</button>
+      </div>
+    </div>`).join("");
+}
+
+document.getElementById("refreshDashboardBtn").onclick=renderDashboard;
+document.getElementById("refreshMatchingBtn").onclick=renderMatching;
+
+
+// ===== 통합검색 =====
+function normalizeText(v){return String(v??"").toLowerCase().replace(/\s+/g," ").trim()}
+function includesQ(value,q){return normalizeText(value).includes(q)}
+function renderGlobalSearch(query=""){
+  const q=normalizeText(query);
+  const results=[];
+  if(q){
+    events.forEach(e=>{
+      const hay=[e.date,e.time,e.type,e.deal,e.client,e.phone,e.title,e.memo,e.review,e.property,e.ownerPhone,e.followDate].join(" ");
+      if(includesQ(hay,q))results.push({kind:"일정",date:e.date,title:`${e.time} ${e.client} · ${e.type}`,detail:`${e.title} / 메모: ${e.memo||"-"} / 후기: ${e.review||"-"}`,action:`editEvent(${e.id})`});
+    });
+    customers.forEach(c=>{
+      const follows=(c.followups||[]).map(f=>`${f.callDate} ${f.note} ${f.nextDate}`).join(" ");
+      const hay=[c.name,c.phone,c.deal,c.status,c.condition,c.expiry,c.memo,follows].join(" ");
+      if(includesQ(hay,q))results.push({kind:"고객",date:c.expiry||"",title:`${c.name} · ${c.deal}`,detail:`${c.phone||"-"} / ${c.condition||"-"} / ${c.memo||"-"}`,action:`openCustomer(${c.id})`});
+    });
+    listings.forEach(l=>{
+      const hay=[l.deal,l.date,l.property,l.status,l.owner,l.phone,l.salePrice,l.deposit,l.rent,l.memo].join(" ");
+      if(includesQ(hay,q))results.push({kind:"매물",date:l.date,title:`${l.property} · ${l.deal}`,detail:`${listingAmount(l)} / ${l.status||"-"} / ${l.phone||"-"} / ${l.memo||"-"}`,action:`openListing(${l.id})`});
+    });
+    contracts.forEach(c=>{
+      const hay=[c.deal,c.date,c.client,c.phone,c.property,c.salePrice,c.deposit,c.rent,c.moveDate,c.expiry,c.fee,c.memo].join(" ");
+      if(includesQ(hay,q))results.push({kind:"계약",date:c.date,title:`${c.client} · ${c.deal} 계약`,detail:`${c.property||"-"} / ${amountText(c)} / 잔금·입주 ${c.moveDate||"-"} / 만기 ${c.expiry||"-"}`,action:`openContract(${c.id})`});
+    });
+    cashEntries.forEach(x=>{
+      const hay=[x.date,x.type,x.amount,x.category,x.title,x.memo].join(" ");
+      if(includesQ(hay,q))results.push({kind:"가계부",date:x.date,title:`${x.type==="income"?"입금":"지출"} · ${x.title}`,detail:`${won(x.amount)} / ${x.category||"-"} / ${x.memo||"-"}`,action:`openCash(${x.id})`});
+    });
+  }
+
+  const counts={일정:0,고객:0,매물:0,계약:0,가계부:0};
+  results.forEach(r=>counts[r.kind]=(counts[r.kind]||0)+1);
+  document.getElementById("searchSummary").innerHTML=`
+    <div class="crm-card"><div class="big">${results.length}</div><div class="small">전체 검색결과</div></div>
+    <div class="crm-card"><div class="big">${counts.고객||0}</div><div class="small">고객</div></div>
+    <div class="crm-card"><div class="big">${counts.매물||0}</div><div class="small">매물</div></div>
+    <div class="crm-card"><div class="big">${counts.계약||0}</div><div class="small">계약</div></div>`;
+
+  if(!q){
+    document.getElementById("searchResults").innerHTML=`<div class="crm-card" style="color:#64748b">검색어를 입력하면 모든 업무기록에서 동시에 찾아드립니다.</div>`;
+    return;
+  }
+  if(!results.length){
+    document.getElementById("searchResults").innerHTML=`<div class="crm-card">“${esc(query)}”에 해당하는 기록이 없습니다.</div>`;
+    return;
+  }
+  results.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  document.getElementById("searchResults").innerHTML=results.map(r=>`
+    <div class="search-result">
+      <div><span class="kind">${r.kind}</span><b>${esc(r.title)}</b> <span style="font-size:11px;color:#94a3b8">${esc(r.date||"")}</span></div>
+      <div style="margin-top:5px;font-size:12px;color:#475569">${esc(r.detail)}</div>
+      <div style="margin-top:8px"><button class="btn" onclick="${r.action}">열기</button></div>
+    </div>`).join("");
+}
+document.getElementById("globalSearchBtn").onclick=()=>renderGlobalSearch(document.getElementById("globalSearchInput").value);
+document.getElementById("globalSearchInput").addEventListener("keydown",e=>{if(e.key==="Enter")renderGlobalSearch(e.target.value)});
+document.getElementById("globalSearchClear").onclick=()=>{document.getElementById("globalSearchInput").value="";renderGlobalSearch("")};
+
+// ===== 전체 백업 / 복원 =====
+function backupPayload(){
+  return {
+    app:"포스코킹 업무플래너",
+    version:"v20",
+    exportedAt:new Date().toISOString(),
+    data:{
+      events,
+      customers,
+      listings,
+      contracts,
+      cashEntries,
+      routines,
+      routineChecks,
+      diaryEntries
+    }
+  };
+}
+function renderBackupSummary(){
+  document.getElementById("backupDataSummary").innerHTML=`
+    <div class="crm-card"><div class="big">${events.length}</div><div class="small">일정</div></div>
+    <div class="crm-card"><div class="big">${customers.length}</div><div class="small">고객</div></div>
+    <div class="crm-card"><div class="big">${listings.length}</div><div class="small">접수매물</div></div>
+    <div class="crm-card"><div class="big">${contracts.length}</div><div class="small">계약완료</div></div>
+    <div class="crm-card"><div class="big">${cashEntries.length}</div><div class="small">가계부</div></div>
+    <div class="crm-card"><div class="big">${routines.length}</div><div class="small">루틴</div></div>
+    <div class="crm-card"><div class="big">${Object.keys(routineChecks).length}</div><div class="small">루틴 기록일</div></div>
+    <div class="crm-card"><div class="big">${Object.keys(diaryEntries).length}</div><div class="small">하루 기록일</div></div>
+    <div class="crm-card"><div class="big">${events.length+customers.length+listings.length+contracts.length+cashEntries.length}</div><div class="small">주요 기록 합계</div></div>`;
+}
+document.getElementById("exportBackupBtn").onclick=()=>{
+  const payload=backupPayload();
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const now=new Date();
+  const name=`포스코킹_업무플래너_백업_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}.json`;
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+  document.getElementById("backupExportStatus").textContent=`백업파일을 만들었습니다. 파일명: ${name}`;
+};
+
+document.getElementById("importBackupBtn").onclick=()=>{
+  const input=document.getElementById("importBackupFile");
+  if(!input.files||!input.files[0]){alert("복원할 백업파일을 먼저 선택해 주세요.");return}
+  const file=input.files[0];
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const obj=JSON.parse(reader.result);
+      if(!obj.data)throw new Error("올바른 백업파일이 아닙니다.");
+      if(!confirm("현재 저장된 데이터를 백업파일 내용으로 교체할까요?"))return;
+      events=Array.isArray(obj.data.events)?obj.data.events:[];
+      customers=Array.isArray(obj.data.customers)?obj.data.customers:[];
+      listings=Array.isArray(obj.data.listings)?obj.data.listings:[];
+      contracts=Array.isArray(obj.data.contracts)?obj.data.contracts:[];
+      cashEntries=Array.isArray(obj.data.cashEntries)?obj.data.cashEntries:[];
+      routines=Array.isArray(obj.data.routines)?obj.data.routines:[];
+      routineChecks=obj.data.routineChecks&&typeof obj.data.routineChecks==="object"?obj.data.routineChecks:{};
+      diaryEntries=obj.data.diaryEntries&&typeof obj.data.diaryEntries==="object"?obj.data.diaryEntries:{};
+
+      save();
+      saveCustomers();
+      saveListings();
+      saveContracts();
+      saveCash();
+      saveRoutines();
+      saveDiaryData();
+
+      render();
+      renderAllCRM();
+      renderBackupSummary();
+      document.getElementById("backupImportStatus").textContent=`복원 완료: ${file.name}`;
+      alert("전체 데이터 복원이 완료되었습니다.");
+    }catch(err){
+      document.getElementById("backupImportStatus").textContent=`복원 실패: ${err.message}`;
+      alert("백업파일을 읽지 못했습니다.");
+    }
+  };
+  reader.readAsText(file,"utf-8");
+};
+
+
+// ===== 오늘의 기록 · 오늘 감사한 일 =====
+let diaryEntries = JSON.parse(localStorage.getItem("pkplanner_v27_diary")||"{}");
+
+function saveDiaryData(){
+  localStorage.setItem("pkplanner_v27_diary",JSON.stringify(diaryEntries));
+}
+function renderDiary(){
+  const ds=fmt(current);
+  const d=diaryEntries[ds]||{record:"",thanks:""};
+  const label=document.getElementById("diaryDateLabel");
+  const record=document.getElementById("diaryRecord");
+  const thanks=document.getElementById("diaryThanks");
+  if(label)label.textContent=`${ds} 기록`;
+  if(record)record.value=d.record||"";
+  if(thanks)thanks.value=d.thanks||"";
+  const saved=document.getElementById("diarySaved");
+  if(saved)saved.textContent="";
+}
+function saveTodayDiary(){
+  const ds=fmt(current);
+  diaryEntries[ds]={
+    record:document.getElementById("diaryRecord")?.value||"",
+    thanks:document.getElementById("diaryThanks")?.value||"",
+    updatedAt:new Date().toISOString()
+  };
+  saveDiaryData();
+  if(typeof renderDaylog==="function")renderDaylog();
+  const saved=document.getElementById("diarySaved");
+  if(saved){
+    saved.textContent="✓ 저장됨";
+    setTimeout(()=>{if(saved)saved.textContent=""},1800);
+  }
+}
+document.getElementById("saveDiaryBtn")?.addEventListener("click",saveTodayDiary);
+
+
+// ===== 나의 하루기록 보관함 =====
+let daylogView="today";
+let daylogCurrent=localTodayNoon();
+
+function daylogRange(){
+  if(daylogView==="today"){
+    const d=fmt(daylogCurrent);
+    return [d,d];
+  }
+  if(daylogView==="week"){
+    const s=startOfWeek(daylogCurrent);
+    const e=new Date(s); e.setDate(e.getDate()+6);
+    return [fmt(s),fmt(e)];
+  }
+  if(daylogView==="month"){
+    const y=daylogCurrent.getFullYear(),m=daylogCurrent.getMonth();
+    return [fmt(new Date(y,m,1,12)),fmt(new Date(y,m+1,0,12))];
+  }
+  if(daylogView==="year"){
+    const y=daylogCurrent.getFullYear();
+    return [`${y}-01-01`,`${y}-12-31`];
+  }
+  return ["0000-01-01","9999-12-31"];
+}
+
+function dayRoutinePctByString(ds){
+  const d=new Date(ds+"T12:00:00");
+  if(typeof applicableRoutines!=="function")return 0;
+  const list=applicableRoutines(d);
+  if(!list.length)return 0;
+  const checked=routineChecks[ds]||{};
+  return Math.round(list.filter(r=>checked[r.id]).length/list.length*100);
+}
+
+function renderDaylog(){
+  const [from,to]=daylogRange();
+  const keys=new Set([
+    ...Object.keys(diaryEntries||{}),
+    ...events.map(e=>e.date),
+    ...Object.keys(routineChecks||{})
+  ]);
+
+  let days=[...keys].filter(ds=>ds>=from&&ds<=to).sort().reverse();
+
+  const withDiary=days.filter(ds=>{
+    const d=diaryEntries[ds]||{};
+    return (d.record||"").trim() || (d.thanks||"").trim();
+  }).length;
+  const eventCount=events.filter(e=>e.date>=from&&e.date<=to).length;
+  const avgRoutine=days.length
+    ? Math.round(days.reduce((s,ds)=>s+dayRoutinePctByString(ds),0)/days.length)
+    : 0;
+
+  document.getElementById("daylogSummary").innerHTML=`
+    <div class="crm-card"><div class="big">${days.length}</div><div class="small">기록된 날짜</div></div>
+    <div class="crm-card"><div class="big">${withDiary}</div><div class="small">일기 작성일</div></div>
+    <div class="crm-card"><div class="big">${eventCount}</div><div class="small">해당 기간 업무</div></div>
+    <div class="crm-card"><div class="big">${avgRoutine}%</div><div class="small">평균 루틴 달성률</div></div>`;
+
+  document.querySelectorAll("[data-daylog-view]").forEach(b=>b.classList.toggle("active",b.dataset.daylogView===daylogView));
+  document.getElementById("daylogDatePick").value=fmt(daylogCurrent);
+
+  if(!days.length){
+    document.getElementById("daylogList").innerHTML=`<div class="daylog-empty">이 기간에는 아직 기록이 없습니다.</div>`;
+    return;
+  }
+
+  document.getElementById("daylogList").innerHTML=days.map(ds=>{
+    const diary=diaryEntries[ds]||{};
+    const evs=events.filter(e=>e.date===ds).slice().sort((a,b)=>a.time.localeCompare(b.time));
+    const pct=dayRoutinePctByString(ds);
+    const dateObj=new Date(ds+"T12:00:00");
+    const weekday=["일","월","화","수","목","금","토"][dateObj.getDay()];
+
+    return `<div class="daylog-card">
+      <div class="date">${ds} (${weekday})</div>
+      <div class="summary">업무 ${evs.length}건 · 루틴 ${pct}%</div>
+
+      <div class="body">
+        <div class="entry"><b>📝 오늘의 기록</b>${esc(diary.record||"기록 없음")}</div>
+        <div class="entry"><b>🙏 오늘 감사한 일</b>${esc(diary.thanks||"기록 없음")}</div>
+      </div>
+
+      <div class="events">
+        <b style="font-size:12px">그날의 주요 업무</b>
+        ${evs.length ? evs.map(e=>`<div class="ev">${esc(e.time)} ${dealBadge(e.deal||"기타")} <b>${esc(e.client||e.title||"업무")}</b> · ${esc(e.type)} · ${esc(e.title||"")}</div>`).join("") : `<div class="ev" style="color:#94a3b8">등록된 업무 없음</div>`}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+document.querySelectorAll("[data-daylog-view]").forEach(b=>{
+  b.onclick=()=>{daylogView=b.dataset.daylogView;renderDaylog()};
+});
+document.getElementById("daylogPrevBtn").onclick=()=>{
+  if(daylogView==="today")daylogCurrent.setDate(daylogCurrent.getDate()-1);
+  else if(daylogView==="week")daylogCurrent.setDate(daylogCurrent.getDate()-7);
+  else if(daylogView==="month")daylogCurrent.setMonth(daylogCurrent.getMonth()-1);
+  else if(daylogView==="year")daylogCurrent.setFullYear(daylogCurrent.getFullYear()-1);
+  renderDaylog();
+};
+document.getElementById("daylogNextBtn").onclick=()=>{
+  if(daylogView==="today")daylogCurrent.setDate(daylogCurrent.getDate()+1);
+  else if(daylogView==="week")daylogCurrent.setDate(daylogCurrent.getDate()+7);
+  else if(daylogView==="month")daylogCurrent.setMonth(daylogCurrent.getMonth()+1);
+  else if(daylogView==="year")daylogCurrent.setFullYear(daylogCurrent.getFullYear()+1);
+  renderDaylog();
+};
+document.getElementById("daylogTodayBtn").onclick=()=>{daylogCurrent=localTodayNoon();renderDaylog()};
+document.getElementById("daylogDatePick").onchange=()=>{daylogCurrent=new Date(document.getElementById("daylogDatePick").value+"T12:00:00");renderDaylog()};
+
+function renderAllCRM(){renderDiary();renderDaylog();renderDashboard();renderCustomers();renderListings();renderMatching();renderFollowup();renderExpiry();renderContracts();renderCashbook();renderRoutine();renderGlobalSearch(document.getElementById('globalSearchInput')?.value||'');renderBackupSummary();renderStats()}
+document.querySelectorAll(".nav button[data-section]").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".nav button[data-section]").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
-    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
     document.getElementById(btn.dataset.section).classList.add("active");
+    if(btn.dataset.section!=="schedule")renderAllCRM();
   };
 });
 
-function exportBackup() {
-  const payload = {
-    events: window.events,
-    customers: window.customers,
-    listings: window.listings,
-    contracts: window.contracts,
-    cashEntries: window.cashEntries,
-    routines: window.routines,
-    routineChecks: window.routineChecks,
-    diaryEntries: window.diaryEntries
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `포스코킹_업무플래너_백업_${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
+// ===== 내 브라우저 알림 =====
+// 주의: 브라우저/프로그램이 열려 있을 때 작동합니다.
+// PC가 꺼져 있거나 브라우저가 완전히 종료된 상태의 푸시 알림은 서버 연결이 필요합니다.
+function updateNotifyButton(){
+  const b=document.getElementById("enableBrowserNotifyBtn");
+  if(!b || !("Notification" in window))return;
+  if(Notification.permission==="granted"){
+    b.textContent="🔔 내 알림 켜짐";
+    b.classList.add("notify-on");
+    b.classList.remove("notify-off");
+  }else{
+    b.textContent="🔕 내 알림 켜기";
+    b.classList.add("notify-off");
+    b.classList.remove("notify-on");
+  }
 }
+async function enableBrowserNotify(){
+  if(!("Notification" in window)){
+    alert("이 브라우저는 알림 기능을 지원하지 않습니다.");
+    return;
+  }
+  const p=await Notification.requestPermission();
+  updateNotifyButton();
+  if(p==="granted"){
+    new Notification("포스코킹 업무플래너", {body:"내 업무 알림이 켜졌습니다."});
+    runDueNotifications(true);
+  }
+}
+function runDueNotifications(force=false){
+  if(!("Notification" in window) || Notification.permission!=="granted")return;
+  const today=fmt(current);
+  const sentKey=`pkplanner_expiry_notify_${today}`;
+  const sent=JSON.parse(localStorage.getItem(sentKey)||"{}");
+  let changed=false;
 
-function importBackup() {
-  const file = document.getElementById("importFile").files[0];
-  if(!file) { alert("백업 파일(.json)을 먼저 선택해 주세요."); return; }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const parsed = JSON.parse(e.target.result);
-      const data = parsed.data || parsed;
-      window.events = data.events || [];
-      window.customers = data.customers || [];
-      window.listings = data.listings || [];
-      window.contracts = data.contracts || [];
-      window.cashEntries = data.cashEntries || data.cash || [];
-      window.routines = data.routines || [];
-      window.routineChecks = data.routineChecks || {};
-      window.diaryEntries = data.diaryEntries || {};
-      
-      saveAll();
-      alert("전체 데이터 복원이 성공적으로 완료되었습니다!");
-    } catch(err) {
-      alert("파일 복원 중 오류가 발생했습니다: " + err.message);
+  customers.filter(c=>c.expiry).forEach(c=>{
+    const remind=addMonths(c.expiry,-6);
+    const due=remind<=today && c.expiry>=today && (c.expiryStatus||"관리전")!=="종료";
+    if(due && (force || !sent[c.id])){
+      new Notification(`만기 6개월 관리 · ${c.name}`, {
+        body:`${c.deal} 고객 / 만기 ${c.expiry} / 연락처 ${c.phone||"-"}`
+      });
+      sent[c.id]=true; changed=true;
     }
-  };
-  reader.readAsText(file);
+    const f=latestFollow(c);
+    if(f && f.nextDate===today && (f.target==="me" || f.target==="both") && (force || !sent[`f_${c.id}_${f.nextDate}`])){
+      new Notification(`오늘 재연락 · ${c.name}`, {
+        body:`${f.note||"고객에게 다시 연락할 일정입니다."}`
+      });
+      sent[`f_${c.id}_${f.nextDate}`]=true; changed=true;
+    }
+  });
+  if(changed)localStorage.setItem(sentKey,JSON.stringify(sent));
 }
+document.getElementById("enableBrowserNotifyBtn")?.addEventListener("click",enableBrowserNotify);
+updateNotifyButton();
+setTimeout(()=>runDueNotifications(false),800);
+setInterval(()=>runDueNotifications(false),60*60*1000);
+
+syncScheduleCustomers();
+renderAllCRM();
+
+render();
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"){
+    document.querySelectorAll(".modal.show").forEach(m=>m.classList.remove("show"));
+  }
+});
+
+document.getElementById("customerModal").addEventListener("click",e=>{
+  if(e.target===document.getElementById("customerModal")) document.getElementById("customerModal").classList.remove("show");
+});
+
 </script>
 </body>
 </html>
+<style>
+.crm-table th:nth-child(5), .crm-table td:nth-child(5){
+  width:auto;
+  min-width:220px;
+  white-space:normal;
+}
+.crm-table th:nth-child(6), .crm-table td:nth-child(6){
+  min-width:130px;
+  width:130px;
+  white-space:nowrap;
+}
+</style>
