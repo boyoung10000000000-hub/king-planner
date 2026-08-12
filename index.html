@@ -3,18 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-<title>포스코킹 업무플래너 v47 - 실시간 연동</title>
+<title>포스코킹 업무플래너 v50 - 실시간 연동</title>
 <style>
-:root{--bg:#f4f7fb;--panel:#fff;--line:#dfe5ee;--text:#1f2937;--muted:#64748b;--accent:#0ea5e9;--shadow:0 6px 18px rgba(15,23,42,.08)}
+:root{
+  --bg:#f4f7fb; --panel:#fff; --line:#dfe5ee; --text:#1f2937; --muted:#64748b;
+  --accent:#0ea5e9; --shadow:0 6px 18px rgba(15,23,42,.08);
+}
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);color:var(--text)}
 
-#loginOverlay{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;color:#fff}
-.login-box{background:#1e293b;padding:32px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.5);text-align:center;max-width:360px;width:90%}
+#loginOverlay{
+  position:fixed;inset:0;background:#0f172a;z-index:9999;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.login-box{
+  background:#1e293b;padding:32px;border-radius:16px;box-shadow:0 10px 25px rgba(0,0,0,0.5);
+  text-align:center;max-width:360px;width:90%;
+}
 .login-box h2{margin-top:0;font-size:22px;color:#38bdf8}
 .login-box p{font-size:13px;color:#94a3b8;margin-bottom:24px;line-height:1.5}
-.btn-google{background:#fff;color:#0f172a;border:none;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.btn-google{
+  background:#fff;color:#0f172a;border:none;padding:12px 20px;border-radius:8px;
+  font-size:14px;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;
+  justify-content:center;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
 
 .app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
 .sidebar{background:#0f172a;color:#fff;padding:18px 14px}
@@ -25,36 +37,194 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .title{font-size:23px;font-weight:800}
 .sub{color:var(--muted);font-size:13px;margin-top:3px}
+.controls{display:flex;gap:7px;flex-wrap:wrap}
+.controls button,.controls input,.controls select{
+  border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px
+}
+.viewtabs{display:flex;gap:6px;margin:12px 0}
+.viewtabs button{border:1px solid var(--line);background:#fff;padding:9px 17px;border-radius:9px;font-weight:700;cursor:pointer}
+.viewtabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;margin:0 0 10px}
+.legend span{display:flex;align-items:center;gap:5px}
+.dot{width:10px;height:10px;border-radius:50%}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.board-wrap{overflow:auto;max-height:calc(100vh - 210px);position:relative}
+.board{position:relative;min-height:1000px}
+.header-row{display:grid;position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+.corner{
+  position:sticky;left:0;z-index:25;background:#f8fafc;border-right:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;font-weight:700
+}
+.day-head{padding:7px 4px;text-align:center;border-right:1px solid var(--line);background:#fff;font-size:11px;min-width:var(--colw)}
+.day-head .d{font-weight:800;font-size:12px}
+.day-head.today{background:#e0f2fe}
+.body-grid{display:grid;position:relative}
+.time-label{
+  position:sticky;left:0;z-index:12;background:#fafafa;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  color:var(--muted);font-size:11px;padding:5px 8px;text-align:right
+}
+.slot{
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:
+    linear-gradient(to bottom,
+      transparent 0,
+      transparent 49%,
+      #edf2f7 49%,
+      #edf2f7 51%,
+      transparent 51%,
+      transparent 100%);
+  min-width:var(--colw)
+}
+.slot.weekend{background:#fcfcfd}
+.event{
+  position:absolute;border-radius:7px;padding:4px 5px;font-size:10px;line-height:1.2;
+  overflow:hidden;border-left:3px solid rgba(0,0,0,.18);box-shadow:0 1px 4px rgba(0,0,0,.08);z-index:8;cursor:pointer
+}
+.event strong{display:block;font-size:10px}
+.event .meta{margin-top:2px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event .phone-line{margin-top:2px;font-size:9px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event .memo-line{margin-top:3px;font-size:9px;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event .review-line{margin-top:2px;font-size:9px;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event.compact .memo-line,.event.compact .review-line{display:none}
+.event.tiny .meta,.event.tiny .phone-line,.event.tiny .memo-line,.event.tiny .review-line{display:none}
+.event.tiny strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event.year-card .memo-line,.event.year-card .review-line{font-size:8px}
+.event.contract-completed-event{
+  background:#f43f7d!important;
+  color:#fff!important;
+  border-left:4px solid #be123c!important;
+  box-shadow:0 3px 10px rgba(190,18,60,.28)!important;
+}
+.event.contract-completed-event strong,
+.event.contract-completed-event .meta,
+.event.contract-completed-event .phone-line,
+.event.contract-completed-event .memo-line,
+.event.contract-completed-event .review-line{color:#fff!important}
+
+.month-marker{position:absolute;top:0;bottom:0;width:2px;background:#94a3b8;opacity:.7;z-index:5}
+.month-tag{position:absolute;top:2px;z-index:22;background:#0f172a;color:#fff;padding:2px 6px;border-radius:6px;font-size:10px}
+.zoom-note{font-size:12px;color:var(--muted);margin:7px 0 0}
+.fab{position:fixed;right:26px;bottom:24px;width:58px;height:58px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:30px;box-shadow:0 8px 18px rgba(14,165,233,.35);cursor:pointer}
+.modal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);align-items:center;justify-content:center;z-index:50}
+.modal.show{display:flex}
+.dialog{background:#fff;width:min(620px,94vw);max-height:88vh;overflow-y:auto;border-radius:16px;padding:18px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.formgrid label{font-size:12px;color:var(--muted)}
+.formgrid input,.formgrid select,.formgrid textarea{width:100%;margin-top:4px;padding:9px;border:1px solid var(--line);border-radius:8px}
+.formgrid textarea{min-height:80px}.full{grid-column:1/-1}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;position:sticky;bottom:-18px;background:#fff;padding:10px 0 2px;z-index:5;border-top:1px solid #eef2f7}
+.actions button{padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:#fff}
+.actions .save{background:var(--accent);color:#fff;border-color:var(--accent)}
+
 .section{display:none}.section.active{display:block}
 .crm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
 .crm-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.crm-card .big{font-size:22px;font-weight:800}
+.crm-card .small{font-size:12px;color:var(--muted)}
+.crm-card.customer-summary-click{cursor:pointer;transition:.15s}
+.crm-card.customer-summary-click:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,23,42,.12)}
+.crm-card.customer-summary-click.selected{outline:3px solid #0f172a;outline-offset:-3px}
+.table-wrap{overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.crm-table{width:100%;border-collapse:collapse;min-width:1050px}
+.crm-table th,.crm-table td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;vertical-align:top}
+.crm-table th{background:#f8fafc;position:sticky;top:0;z-index:2}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:11px;font-weight:700}
+.badge.sale{background:#fef08a}.badge.jeonse{background:#bbf7d0}.badge.monthly{background:#bae6fd}.badge.etc{background:#e5e7eb}
+.alert-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px;margin-bottom:12px}
+.expiry-critical{background:#fff1f2;border:2px solid #fb7185;border-radius:12px;padding:12px;margin-bottom:12px}
+.expiry-critical .expiry-title{font-size:15px;font-weight:800;color:#9f1239}
+.expiry-critical .expiry-sub{font-size:11px;color:#881337;margin-top:3px}
+.expiry-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.expiry-status{display:inline-block;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:800;background:#fff;border:1px solid #fecdd3}
+.notify-on{background:#dcfce7!important;color:#166534!important;border-color:#86efac!important}
+.notify-off{background:#f8fafc!important;color:#64748b!important}
+
 .btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:12px}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.danger{color:#b91c1c}
 
-.customer-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0;flex-wrap:wrap}
-.customer-table-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:auto;box-shadow:var(--shadow)}
-.customer-table{width:100%;border-collapse:collapse;min-width:1100px;font-size:13px}
-.customer-table th,.customer-table td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
-.customer-table th{background:#f8fafc;position:sticky;top:0}
-.status{display:inline-block;padding:5px 9px;border-radius:999px;font-weight:700;font-size:12px}
-.status-progress{background:#dbeafe;color:#1d4ed8}.status-contract{background:#fecdd3;color:#be123c}.status-other{background:#f1f5f9;color:#64748b}.status-done{background:#e2e8f0;color:#475569}
-.row-contract{background:#fff0f3}.row-other{background:#fafafa;color:#64748b}
-.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
-.modal.show{display:flex}.modal-box{background:#fff;border-radius:16px;width:min(760px,100%);max-height:92vh;overflow:auto;padding:20px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field.full{grid-column:1/-1}
-.field input,.field select,.field textarea{border:1px solid #cbd5e1;border-radius:8px;padding:10px;font:inherit}.field textarea{min-height:74px;resize:vertical}
-.modal-actions{display:flex;justify-content:space-between;gap:8px;margin-top:16px}
-@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:block;padding:8px}.brand{font-size:17px;margin:4px 6px 8px}.nav{display:flex;overflow:auto;gap:4px}.nav button{width:auto;white-space:nowrap;padding:8px}.main{padding:8px}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+.contract-tabs,.listing-tabs,.cash-tabs,.daylog-tabs,.customer-filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.contract-tabs button,.listing-tabs button,.cash-tabs button,.daylog-tabs button,.customer-filter-tabs button{border:1px solid var(--line);background:#fff;padding:8px 13px;border-radius:999px;font-weight:700;cursor:pointer}
+.contract-tabs button.active,.listing-tabs button.active,.cash-tabs button.active,.daylog-tabs button.active,.customer-filter-tabs button.active{background:#0f172a;color:#fff}
+.contract-card-grid,.listing-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.contract-card,.listing-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.contract-card h4,.listing-card h4{margin:0 0 8px;font-size:15px}
+.contract-card .row,.listing-card .row{display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:4px 0;border-bottom:1px dashed #e5e7eb}
+.contract-card .row:last-child,.listing-card .row:last-child{border-bottom:0}
+.contract-card .label,.listing-card .label{color:var(--muted)}
+.contract-card .value,.listing-card .value{font-weight:700;text-align:right}
 
+.cash-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+.cash-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.cash-card .amt{font-size:22px;font-weight:800}
+.cash-card .lbl{font-size:12px;color:var(--muted)}
+.cash-card.income{background:#eff6ff}.cash-card.expense{background:#fff7ed}.cash-card.balance{background:#f0fdf4}
+.money-plus{color:#0369a1;font-weight:800}.money-minus{color:#c2410c;font-weight:800}
+
+.search-box{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.search-box input{flex:1;min-width:260px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;font-size:14px}
+.search-result{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow)}
+.search-result .kind{display:inline-block;font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;background:#e2e8f0;margin-right:6px}
+.backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.backup-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.dashboard-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+
+.dashboard-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.dashboard-card .big{font-size:24px;font-weight:800}
+.dashboard-card .small{font-size:12px;color:var(--muted)}
+.dashboard-section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:12px}
+.diary-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.diary-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.diary-box textarea{width:100%;min-height:110px;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;box-sizing:border-box}
+.daylog-list{display:grid;gap:10px}
+.daylog-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.daylog-card .body{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.daylog-card .entry{background:#f8fafc;border-radius:10px;padding:10px;font-size:12px;white-space:pre-wrap;line-height:1.5}
+.todo-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line)}
+.match-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.match-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:var(--shadow)}
+.match-score{display:inline-block;background:#0f172a;color:#fff;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:800}
+.quick-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.quick-buttons button{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;cursor:pointer}
+.routine-top{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-bottom:12px}
+.routine-box{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.routine-progress{height:18px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:8px 0}
+.routine-progress > div{height:100%;background:#0ea5e9;border-radius:999px}
+.routine-list{display:grid;gap:8px}
+.routine-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.routine-item.done{background:#f0fdf4}
+.graph-grid,.routine-individual-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.graph-box,.routine-individual-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
+.bar-row,.routine-mini-bar{display:grid;grid-template-columns:100px 1fr 54px;gap:8px;align-items:center;margin:10px 0}
+.bar-track,.routine-mini-track{height:20px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+.bar-fill,.routine-mini-fill{height:100%;background:#0ea5e9;border-radius:999px}
+.routine-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.rcell{border:1px solid var(--line);border-radius:8px;padding:6px;min-height:58px;font-size:11px;background:#fff}
+.rcell.good{background:#dcfce7}.rcell.mid{background:#fef9c3}.rcell.low{background:#fee2e2}.rcell.empty{background:#f8fafc;color:#94a3b8}
+.schedule-summary{display:grid;grid-template-columns:repeat(6,minmax(110px,1fr));gap:8px;margin:8px 0 12px}
+.schedule-summary-card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 11px;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+.schedule-summary-card .n{font-size:19px;font-weight:900}
+.schedule-summary-card .l{font-size:11px;color:#64748b;margin-top:2px}
+.schedule-summary-card.contract{background:#ffe0e9;border-color:#fb7185}
+.schedule-summary-card.contract .n,.schedule-summary-card.contract .l{color:#be123c}
+.year-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px;background:#f8fafc}
+.year-month-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:var(--shadow);cursor:pointer;min-height:150px}
+.crm-table tr.contract-done td{background:#ffe4ea}
+.crm-table tr.contract-done td:first-child{border-left:5px solid #f43f5e}
+
+@media(max-width:1100px){.crm-grid,.contract-card-grid,.listing-card-grid,.cash-summary,.routine-top,.graph-grid,.routine-individual-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:8px}}
+.crm-table th:nth-child(5), .crm-table td:nth-child(5){min-width:220px;white-space:normal;}
+.crm-table th:nth-child(6), .crm-table td:nth-child(6){min-width:130px;white-space:nowrap;}
 </style>
 </head>
 <body>
 
 <div id="loginOverlay">
   <div class="login-box">
-    <h2>포스코킹 업무플래너</h2>
-    <p>구글 로그인 후 PC와 폰에서 실시간 연동으로 사용하세요.</p>
+    <h2>포스코킹 업무플래너 v50</h2>
+    <p>구글 로그인 후 PC와 스마트폰에서 실시간 연동하여 이용하세요.</p>
     <button class="btn-google" id="loginBtn">
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
       Google 계정으로 로그인
@@ -70,7 +240,15 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
       <button data-section="schedule">📅 일정</button>
       <button data-section="customers">👤 고객관리</button>
       <button data-section="listings">🏠 접수매물</button>
+      <button data-section="matching">🔗 고객·매물매칭</button>
+      <button data-section="expiry">⏰ 만기관리</button>
       <button data-section="contracts">✅ 계약완료</button>
+      <button data-section="cashbook">💰 가계부</button>
+      <button data-section="routine">✅ 하루루틴</button>
+      <button data-section="daylog">📖 나의 하루기록</button>
+      <button data-section="search">🔎 통합검색</button>
+      <button data-section="backup">💾 백업·복원</button>
+      <button data-section="stats">📊 업무통계</button>
     </div>
     <div style="margin-top:20px;padding:10px 8px;border-top:1px solid #334155">
       <div id="userEmail" style="font-size:11px;color:#94a3b8;word-break:break-all;margin-bottom:8px"></div>
@@ -85,45 +263,125 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
           <div class="title">오늘의 업무 대시보드</div>
           <div class="sub">실시간 클라우드 동기화 연결됨</div>
         </div>
+        <div class="controls">
+          <button class="btn" id="enableBrowserNotifyBtn">🔔 내 알림 켜기</button>
+          <button class="primary btn" id="refreshDashboardBtn">새로고침</button>
+        </div>
       </div>
-      <div style="margin-top:20px" class="crm-grid">
-        <div class="crm-card"><b>PC / 스마트폰 연동 완료</b><br><span style="font-size:12px;color:#64748b">어느 기기에서 수정하든 즉시 반영됩니다.</span></div>
+      <div id="dashboardSummary" class="dashboard-grid"></div>
+      <div class="dashboard-section"><b>오늘 시간별 업무</b><div id="dashboardTodayEvents"></div></div>
+      <div class="dashboard-section"><b>오늘 꼭 확인할 것</b><div id="dashboardTodo"></div></div>
+      <div class="dashboard-section"><b>오늘 루틴</b><span id="dashboardRoutinePct"></span><div id="dashboardRoutine"></div></div>
+      <div class="dashboard-section">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div><b>🌙 하루 마무리</b><div id="diaryDateLabel"></div></div>
+          <div><button class="btn primary" id="saveDiaryBtn">오늘 기록 저장</button><span id="diarySaved" style="color:#16a34a;font-weight:700;margin-left:8px"></span></div>
+        </div>
+        <div class="diary-grid">
+          <div class="diary-box"><b>📝 오늘의 기록</b><textarea id="diaryRecord" placeholder="오늘 있었던 일..."></textarea></div>
+          <div class="diary-box"><b>🙏 오늘 감사한 일</b><textarea id="diaryThanks" placeholder="오늘 감사했던 일..."></textarea></div>
+        </div>
       </div>
     </section>
 
-    <section id="schedule" class="section"><div class="topbar"><div class="title">일정관리</div></div></section>
-    
-<section id="customers" class="section">
-  <div class="topbar">
-    <div>
-      <div class="title">고객관리</div>
-      <div class="sub">PC와 스마트폰에서 같은 고객자료를 실시간으로 사용합니다.</div>
-    </div>
-    <button class="btn primary" id="addCustomerBtn">+ 고객등록</button>
-  </div>
-  <div class="crm-grid" style="margin-top:14px">
-    <div class="crm-card"><b id="cntAll">0</b><br><span class="sub">전체 고객</span></div>
-    <div class="crm-card" style="background:#eff6ff"><b id="cntProgress">0</b><br><span class="sub">진행중 / 대기</span></div>
-    <div class="crm-card" style="background:#fff0f3"><b id="cntContract">0</b><br><span class="sub">계약완료</span></div>
-    <div class="crm-card" style="background:#fafafa"><b id="cntOther">0</b><br><span class="sub">타부동산 계약</span></div>
-  </div>
-  <div class="customer-table-wrap">
-    <table class="customer-table">
-      <thead><tr><th>등록일</th><th>고객</th><th>상태</th><th>거래</th><th>핵심조건</th><th>전화</th><th>계약/종료 정보</th><th>최근 통화</th><th>다음 알림</th><th>관리</th></tr></thead>
-      <tbody id="customerRows"><tr><td colspan="10">고객자료를 불러오는 중입니다.</td></tr></tbody>
-    </table>
-  </div>
-</section>
+    <section id="schedule" class="section">
+      <div class="topbar">
+        <div><div class="title">24시간 연속 시간축 스케줄</div></div>
+        <div class="controls">
+          <button id="prevBtn">◀</button><button id="todayBtn">오늘</button><button id="nextBtn">▶</button>
+          <input id="datePick" type="date">
+          <select id="zoomSel"><option value="90">넓게</option><option value="70" selected>보통</option><option value="52">촘촘하게</option><option value="38">연간 압축</option></select>
+        </div>
+      </div>
+      <div class="viewtabs">
+        <button data-view="day" class="active">하루</button><button data-view="week">일주일</button><button data-view="month">한달</button><button data-view="year">1년</button>
+      </div>
+      <div id="scheduleSummary" class="schedule-summary"></div>
+      <div class="panel"><div id="boardWrap" class="board-wrap"><div id="content"></div></div></div>
+    </section>
 
-    <section id="listings" class="section"><div class="topbar"><div class="title">접수매물</div></div></section>
-    <section id="contracts" class="section"><div class="topbar"><div class="title">계약완료</div></div></section>
+    <section id="customers" class="section">
+      <div class="topbar"><div><div class="title">고객관리</div></div><div class="controls"><button class="primary btn" id="addCustomerBtn">＋ 고객등록</button></div></div>
+      <div id="customerSummary" class="crm-grid"></div>
+      <div id="customerTable"></div>
+    </section>
+
+    <section id="listings" class="section">
+      <div class="topbar"><div><div class="title">접수매물</div></div><div class="controls"><button class="primary btn" id="addListingBtn">＋ 매물등록</button></div></div>
+      <div id="listingSummary" class="crm-grid"></div>
+      <div id="listingList"></div>
+    </section>
+
+    <section id="matching" class="section">
+      <div class="topbar"><div><div class="title">고객 · 매물 자동매칭</div></div></div>
+      <div id="matchingSummary" class="crm-grid"></div>
+      <div id="matchingList" class="match-grid"></div>
+    </section>
+
+    <section id="expiry" class="section">
+      <div class="topbar"><div><div class="title">만기관리</div></div></div>
+      <div id="expiryAlerts"></div>
+      <div id="expiryTable"></div>
+    </section>
+
+    <section id="contracts" class="section">
+      <div class="topbar"><div><div class="title">계약완료</div></div><div class="controls"><button class="primary btn" id="addContractBtn">＋ 계약등록</button></div></div>
+      <div id="contractSummary" class="crm-grid"></div>
+      <div id="contractList"></div>
+    </section>
+
+    <section id="cashbook" class="section">
+      <div class="topbar"><div><div class="title">가계부</div></div><div class="controls"><button class="primary btn" id="addCashBtn">＋ 입출금 등록</button></div></div>
+      <div id="cashSummary" class="cash-summary"></div>
+      <div id="cashList"></div>
+    </section>
+
+    <section id="routine" class="section">
+      <div class="topbar"><div><div class="title">하루루틴</div></div><div class="controls"><button class="primary btn" id="addRoutineBtn">＋ 루틴추가</button></div></div>
+      <div id="routineList" class="routine-list"></div>
+    </section>
+
+    <section id="daylog" class="section">
+      <div class="topbar"><div><div class="title">나의 하루기록</div></div></div>
+      <div id="daylogList" class="daylog-list"></div>
+    </section>
+
+    <section id="search" class="section">
+      <div class="topbar"><div><div class="title">통합검색</div></div></div>
+      <div class="search-box"><input id="globalSearchInput" placeholder="검색어 입력..."><button class="btn primary" id="globalSearchBtn">검색</button></div>
+      <div id="searchResults"></div>
+    </section>
+
+    <section id="backup" class="section">
+      <div class="topbar"><div><div class="title">백업 · 복원</div></div></div>
+      <div class="backup-grid">
+        <div class="backup-box">
+          <h3>💾 전체 백업</h3>
+          <p style="font-size:12px;color:var(--muted)">내 계정에 저장된 모든 데이터를 파일(.json)로 저장합니다.</p>
+          <button class="btn primary" onclick="exportBackup()">백업파일 만들기</button>
+        </div>
+        <div class="backup-box">
+          <h3>♻️ 전체 복원</h3>
+          <p style="font-size:12px;color:var(--muted)">갖고 계신 .json 파일(백업파일)을 선택해 복원합니다.</p>
+          <input type="file" id="importFile" accept=".json">
+          <button class="btn primary" style="margin-top:8px" onclick="importBackup()">데이터 복원 실행</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="stats" class="section">
+      <div class="topbar"><div><div class="title">업무통계</div></div></div>
+      <div id="statsGrid" class="crm-grid"></div>
+    </section>
   </main>
 </div>
+
+<button class="fab" id="addBtn">＋</button>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-  import { getDatabase, ref, push, set, update, remove, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyD_R1BqvCu6-6G50n8trya1OKb-u3oLAmU",
@@ -140,121 +398,64 @@ body{margin:0;font-family:Arial,"Noto Sans KR",sans-serif;background:var(--bg);c
   const db = getDatabase(app);
   const provider = new GoogleAuthProvider();
 
-  document.getElementById("loginBtn").onclick = () => signInWithPopup(auth, provider).catch(e => alert(e.message));
+  let currentUser = null;
+
+  document.getElementById("loginBtn").onclick = () => signInWithPopup(auth, provider).catch(e => alert("로그인 실패: " + e.message));
   document.getElementById("logoutBtn").onclick = () => signOut(auth).then(() => location.reload());
 
   onAuthStateChanged(auth, user => {
     if (user) {
+      currentUser = user;
       document.getElementById("loginOverlay").style.display = "none";
       document.getElementById("userEmail").textContent = user.email;
       document.getElementById("logoutBtn").style.display = "block";
+
+      onValue(ref(db, 'users/' + user.uid), (snapshot) => {
+        const data = snapshot.val() || {};
+        if (data.events) window.events = data.events;
+        if (data.customers) window.customers = data.customers;
+        if (data.listings) window.listings = data.listings;
+        if (data.contracts) window.contracts = data.contracts;
+        if (data.cashEntries) window.cashEntries = data.cashEntries;
+        if (data.routines) window.routines = data.routines;
+        if (data.routineChecks) window.routineChecks = data.routineChecks;
+        if (data.diaryEntries) window.diaryEntries = data.diaryEntries;
+
+        if (typeof window.renderAllCRM === 'function') window.renderAllCRM();
+        if (typeof window.render === 'function') window.render();
+      });
     } else {
       document.getElementById("loginOverlay").style.display = "flex";
     }
   });
 
-  let currentUser = null;
-  let customers = {};
-  let editingId = null;
-  let unsubscribeCustomers = null;
-
-  const $ = id => document.getElementById(id);
-  const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
-
-  function statusLabel(v){
-    return {progress:"진행중",contract:"계약완료",other:"타부동산 계약",done:"기타 종료"}[v] || "진행중";
-  }
-  function statusClass(v){
-    return {progress:"status-progress",contract:"status-contract",other:"status-other",done:"status-done"}[v] || "status-progress";
-  }
-  function renderCustomers(){
-    const arr = Object.entries(customers || {}).map(([id,v])=>({id,...v}))
-      .sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||"") || (b.date||"").localeCompare(a.date||""));
-    $("cntAll").textContent = arr.length;
-    $("cntProgress").textContent = arr.filter(x=>x.status==="progress").length;
-    $("cntContract").textContent = arr.filter(x=>x.status==="contract").length;
-    $("cntOther").textContent = arr.filter(x=>x.status==="other").length;
-    $("customerRows").innerHTML = arr.length ? arr.map(c => `
-      <tr class="${c.status==="contract"?"row-contract":c.status==="other"?"row-other":""}">
-        <td>${esc(c.date||"")}</td>
-        <td><b>${esc(c.name||"")}</b></td>
-        <td><span class="status ${statusClass(c.status)}">${statusLabel(c.status)}</span></td>
-        <td>${esc(c.deal||"")}</td>
-        <td style="max-width:360px;white-space:pre-wrap">${esc(c.core||"")}</td>
-        <td style="white-space:nowrap">${esc(c.phone||"")}</td>
-        <td style="white-space:pre-wrap">${esc(c.contractInfo||"")}</td>
-        <td style="white-space:pre-wrap">${esc(c.call||"")}</td>
-        <td>${esc(c.next||"")}</td>
-        <td><button class="btn editCustomer" data-id="${c.id}">수정</button></td>
-      </tr>`).join("") : '<tr><td colspan="10">등록된 고객이 없습니다.</td></tr>';
-    document.querySelectorAll(".editCustomer").forEach(b=>b.onclick=()=>openCustomer(b.dataset.id));
-  }
-
-  function openCustomer(id=null){
-    editingId=id;
-    const c=id ? customers[id] : {};
-    $("customerModalTitle").textContent=id?"고객 수정":"고객등록";
-    $("cDate").value=c.date || new Date().toISOString().slice(0,10);
-    $("cName").value=c.name || "";
-    $("cStatus").value=c.status || "progress";
-    $("cDeal").value=c.deal || "매매";
-    $("cPhone").value=c.phone || "";
-    $("cNext").value=c.next || "";
-    $("cCore").value=c.core || "";
-    $("cCall").value=c.call || "";
-    $("cContractInfo").value=c.contractInfo || "";
-    $("deleteCustomerBtn").style.display=id?"block":"none";
-    $("customerModal").classList.add("show");
-  }
-  function closeCustomer(){ $("customerModal").classList.remove("show"); editingId=null; }
-
-  $("addCustomerBtn").onclick=()=>openCustomer();
-  $("cancelCustomerBtn").onclick=closeCustomer;
-  $("customerModal").onclick=e=>{ if(e.target===$("customerModal")) closeCustomer(); };
-
-  $("saveCustomerBtn").onclick=async()=>{
-    if(!currentUser) return alert("로그인이 필요합니다.");
-    const name=$("cName").value.trim();
-    if(!name) return alert("고객명을 입력해주세요.");
-    const data={
-      date:$("cDate").value, name, status:$("cStatus").value, deal:$("cDeal").value,
-      phone:$("cPhone").value.trim(), next:$("cNext").value, core:$("cCore").value.trim(),
-      call:$("cCall").value.trim(), contractInfo:$("cContractInfo").value.trim(),
-      updatedAt:new Date().toISOString()
-    };
-    try{
-      if(editingId) await update(ref(db, `customers/${editingId}`), data);
-      else {
-        data.createdAt=new Date().toISOString();
-        await set(push(ref(db,"customers")), data);
-      }
-      closeCustomer();
-    }catch(e){ alert("저장 실패: "+e.message); }
+  window.syncToCloud = function() {
+    if (!currentUser) return;
+    set(ref(db, 'users/' + currentUser.uid), {
+      events: window.events || [],
+      customers: window.customers || [],
+      listings: window.listings || [],
+      contracts: window.contracts || [],
+      cashEntries: window.cashEntries || [],
+      routines: window.routines || [],
+      routineChecks: window.routineChecks || {},
+      diaryEntries: window.diaryEntries || {}
+    });
   };
-
-  $("deleteCustomerBtn").onclick=async()=>{
-    if(!editingId || !confirm("이 고객을 삭제할까요?")) return;
-    try{ await remove(ref(db,`customers/${editingId}`)); closeCustomer(); }
-    catch(e){ alert("삭제 실패: "+e.message); }
-  };
-
-  onAuthStateChanged(auth, user => {
-    currentUser=user;
-    if(unsubscribeCustomers){ unsubscribeCustomers(); unsubscribeCustomers=null; }
-    if(user){
-      unsubscribeCustomers=onValue(ref(db,"customers"), snap=>{
-        customers=snap.val() || {};
-        renderCustomers();
-      }, err=>{
-        $("customerRows").innerHTML=`<tr><td colspan="10">데이터 읽기 실패: ${esc(err.message)}</td></tr>`;
-      });
-    } else {
-      customers={}; renderCustomers();
-    }
-  });
 </script>
 
 <script>
+window.events = JSON.parse(localStorage.getItem("pkplanner_v21_events")||"[]");
+window.customers = JSON.parse(localStorage.getItem("pkplanner_v21_customers")||"[]");
+window.listings = JSON.parse(localStorage.getItem("pkplanner_v21_listings")||"[]");
+window.contracts = JSON.parse(localStorage.getItem("pkplanner_v21_contracts")||"[]");
+window.cashEntries = JSON.parse(localStorage.getItem("pkplanner_v21_cash")||"[]");
+window.routines = JSON.parse(localStorage.getItem("pkplanner_v25_routines")||"[]");
+window.routineChecks = JSON.parse(localStorage.getItem("pkplanner_v25_routineChecks")||"{}");
+window.diaryEntries = JSON.parse(localStorage.getItem("pkplanner_v27_diary")||"{}");
+
+function saveAll() { if (window.syncToCloud) window.syncToCloud(); }
+
 document.querySelectorAll(".nav button[data-section]").forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll(".nav button[data-section]").forEach(b => b.classList.remove("active"));
@@ -263,28 +464,50 @@ document.querySelectorAll(".nav button[data-section]").forEach(btn => {
     document.getElementById(btn.dataset.section).classList.add("active");
   };
 });
+
+function exportBackup() {
+  const payload = {
+    events: window.events,
+    customers: window.customers,
+    listings: window.listings,
+    contracts: window.contracts,
+    cashEntries: window.cashEntries,
+    routines: window.routines,
+    routineChecks: window.routineChecks,
+    diaryEntries: window.diaryEntries
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `포스코킹_업무플래너_백업_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importBackup() {
+  const file = document.getElementById("importFile").files[0];
+  if(!file) { alert("백업 파일(.json)을 먼저 선택해 주세요."); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      const data = parsed.data || parsed;
+      window.events = data.events || [];
+      window.customers = data.customers || [];
+      window.listings = data.listings || [];
+      window.contracts = data.contracts || [];
+      window.cashEntries = data.cashEntries || data.cash || [];
+      window.routines = data.routines || [];
+      window.routineChecks = data.routineChecks || {};
+      window.diaryEntries = data.diaryEntries || {};
+      
+      saveAll();
+      alert("전체 데이터 복원이 성공적으로 완료되었습니다!");
+    } catch(err) {
+      alert("파일 복원 중 오류가 발생했습니다: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
 </script>
-
-<div id="customerModal" class="modal">
-  <div class="modal-box">
-    <h2 id="customerModalTitle" style="margin-top:0">고객등록</h2>
-    <div class="form-grid">
-      <div class="field"><label>등록일</label><input id="cDate" type="date"></div>
-      <div class="field"><label>고객명</label><input id="cName" placeholder="고객명"></div>
-      <div class="field"><label>상태</label><select id="cStatus"><option value="progress">진행중/대기</option><option value="contract">계약완료</option><option value="other">타부동산 계약</option><option value="done">기타 종료</option></select></div>
-      <div class="field"><label>거래</label><select id="cDeal"><option>매매</option><option>전세</option><option>월세</option><option>기타</option></select></div>
-      <div class="field"><label>전화번호</label><input id="cPhone" placeholder="010-0000-0000"></div>
-      <div class="field"><label>다음 알림</label><input id="cNext" type="date"></div>
-      <div class="field full"><label>핵심조건</label><textarea id="cCore" placeholder="원하는 동·층·금액·입주일 등"></textarea></div>
-      <div class="field full"><label>최근 통화 / 안내내용</label><textarea id="cCall" placeholder="최근 통화 내용"></textarea></div>
-      <div class="field full"><label>계약 / 종료 정보</label><textarea id="cContractInfo" placeholder="계약금, 계약서 작성일, 잔금일 또는 종료 사유"></textarea></div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn danger" id="deleteCustomerBtn" style="display:none">삭제</button>
-      <div style="margin-left:auto;display:flex;gap:8px"><button class="btn" id="cancelCustomerBtn">취소</button><button class="btn primary" id="saveCustomerBtn">저장</button></div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
